@@ -3,6 +3,17 @@ import { mockContainers, mockHostStats, mockResourceUsage, mockSummary, mockCont
 import { Container, HostStats, ResourceUsage, ContainerDetails, DockerImage, DockerVolume, DockerNetwork, ContainerSummary, Alert, HostDetails as HostDetailsType, ActivityEvent, ContainerStatus } from '@/lib/types';
 import { toast } from 'sonner';
 import React from 'react';
+
+const createPruneSystemSummary = (danglingImagesCount: number) => (
+  React.createElement('ul', { className: "list-disc pl-5 text-sm" },
+    React.createElement('li', null, `${danglingImagesCount} dangling image(s) will be removed.`),
+    React.createElement('li', null, '(Mock) Stopped containers will be removed.'),
+    React.createElement('li', null, '(Mock) Unused networks will be removed.')
+  )
+);
+
+const createPruneImagesSummary = (danglingImagesCount: number) => React.createElement('p', null, `${danglingImagesCount} dangling image(s) will be removed.`);
+
 type DialogState = {
   isOpen: boolean;
   title: string;
@@ -181,7 +192,7 @@ export const useStore = create<AppState>((set, get) => ({
     get().showDialog({
       title: 'Prune Unused Images?',
       description: 'This will remove all dangling images (images not tagged or associated with a container). This action cannot be undone.',
-      summary: (<p>{danglingImages.length} dangling image(s) will be removed.</p>),
+      summary: createPruneImagesSummary(danglingImages.length),
       onConfirm: () => {
         set(state => ({
           images: state.images.filter(i => i.name !== '<none>')
@@ -201,13 +212,7 @@ export const useStore = create<AppState>((set, get) => ({
     get().showDialog({
       title: 'Prune System?',
       description: 'This will remove all stopped containers, dangling images, and unused networks and volumes. This action is irreversible.',
-      summary: (
-        <ul className="list-disc pl-5 text-sm">
-          <li>{danglingImages.length} dangling image(s) will be removed.</li>
-          <li>(Mock) Stopped containers will be removed.</li>
-          <li>(Mock) Unused networks will be removed.</li>
-        </ul>
-      ),
+      summary: createPruneSystemSummary(danglingImages.length),
       onConfirm: () => {
         set(state => ({
           images: state.images.filter(i => i.name !== '<none>')
