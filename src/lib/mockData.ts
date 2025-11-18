@@ -1,4 +1,4 @@
-import { Container, HostStats, ResourceUsage, ContainerDetails, LogEntry, ContainerEvent } from './types';
+import { Container, HostStats, ResourceUsage, ContainerDetails, LogEntry, ContainerEvent, DockerImage, DockerVolume, DockerNetwork } from './types';
 export const mockContainers: Container[] = [
   {
     id: 'a1b2c3d4e5f6',
@@ -144,4 +144,25 @@ export const mockContainerEvents: ContainerEvent[] = [
   { timestamp: '2023-10-26T05:30:00Z', status: 'health_status: healthy', message: 'Health check passed' },
   { timestamp: '2023-10-27T08:00:00Z', status: 'kill', message: 'Container killed with signal 9' },
   { timestamp: '2023-10-27T08:00:05Z', status: 'start', message: 'Container restarted' },
+];
+export const mockImages: DockerImage[] = [
+  { id: 'f6d0b1e8ec93', name: 'nginx', tag: 'latest', size: '133MB', created: '3 weeks ago' },
+  { id: 'a2a15feb1349', name: 'postgres', tag: '13', size: '314MB', created: '2 months ago' },
+  { id: 'e9b4a5f78c1d', name: 'redis', tag: '6-alpine', size: '32MB', created: '1 month ago' },
+  { id: 'b8f2d5e7a9c1', name: 'ubuntu', tag: '20.04', size: '72.9MB', created: '5 days ago' },
+  { id: 'c1d9e8f7a6b5', name: 'kong', tag: 'latest', size: '450MB', created: '1 week ago' },
+  { id: 'd4e5f6a1b2c3', name: 'prom/prometheus', tag: 'v2.26.0', size: '188MB', created: '4 weeks ago' },
+  { id: 'g7h8i9j0k1l2', name: '<none>', tag: '<none>', size: '125MB', created: '2 days ago' },
+];
+export const mockVolumes: DockerVolume[] = [
+  { name: 'postgres_data', driver: 'local', size: '2.5GB', containersInUse: ['database-main'] },
+  { name: 'redis_cache_data', driver: 'local', size: '512MB', containersInUse: ['redis-cache'] },
+  { name: 'app_logs', driver: 'local', size: '1.2GB', containersInUse: ['web-server-prod', 'api-gateway'] },
+  { name: 'jenkins_home', driver: 'local', size: '15GB', containersInUse: [] },
+];
+export const mockNetworks: DockerNetwork[] = [
+  { id: 'b7c8d9e0f1a2', name: 'bridge', driver: 'bridge', scope: 'local' },
+  { id: 'c8d9e0f1a2b3', name: 'host', driver: 'host', scope: 'local' },
+  { id: 'd9e0f1a2b3c4', name: 'none', driver: 'null', scope: 'local' },
+  { id: 'e0f1a2b3c4d5', name: 'app_network', driver: 'bridge', scope: 'local' },
 ];

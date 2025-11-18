@@ -15,19 +15,20 @@ export interface Container {
   memoryLimit: number;
   uptime: string;
 }
-export interface Image {
+export interface DockerImage {
   id: string;
   name: string;
   tag: string;
   size: string;
   created: string;
 }
-export interface Volume {
+export interface DockerVolume {
   name: string;
   driver: string;
-  mountpoint: string;
+  size: string;
+  containersInUse: string[];
 }
-export interface Network {
+export interface DockerNetwork {
   id:string;
   name: string;
   driver: string;
