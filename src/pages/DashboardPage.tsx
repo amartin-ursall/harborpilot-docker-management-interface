@@ -27,7 +27,7 @@ import {
   ResponsiveContainer,
   Legend,
 } from 'recharts';
-import { ChartTooltipContent } from '@/components/ui/chart';
+import { ChartContainer, ChartTooltipContent } from '@/components/ui/chart';
 const summaryCards = [
   {
     title: 'Containers',
@@ -58,6 +58,16 @@ export function DashboardPage() {
   const summary = useStore((s) => s.summary);
   const hostStats = useStore((s) => s.hostStats);
   const resourceUsage = useStore((s) => s.resourceUsage);
+  const chartConfig = {
+    cpu: {
+      label: 'CPU Usage (%)',
+      color: 'hsl(var(--primary))',
+    },
+    memory: {
+      label: 'Memory Usage (%)',
+      color: 'hsl(var(--chart-2))',
+    },
+  };
   return (
     <div className="max-w-full mx-auto animate-fade-in">
       <div className="py-8 md:py-10 px-4 sm:px-6 lg:px-8 space-y-8">
@@ -105,28 +115,30 @@ export function DashboardPage() {
             <CardContent>
               <div className="h-[350px] w-full">
                 <ResponsiveContainer>
-                  <AreaChart data={resourceUsage}>
-                    <defs>
-                      <linearGradient id="colorCpu" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.8}/>
-                        <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0}/>
-                      </linearGradient>
-                      <linearGradient id="colorMemory" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="hsl(var(--chart-2))" stopOpacity={0.8}/>
-                        <stop offset="95%" stopColor="hsl(var(--chart-2))" stopOpacity={0}/>
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
-                    <XAxis dataKey="time" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} />
-                    <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} unit="%" />
-                    <Tooltip
-                      cursor={{ fill: 'hsl(var(--accent))' }}
-                      content={<ChartTooltipContent indicator="dot" />}
-                    />
-                    <Legend />
-                    <Area type="monotone" dataKey="cpu" stroke="hsl(var(--primary))" fillOpacity={1} fill="url(#colorCpu)" name="CPU Usage (%)" />
-                    <Area type="monotone" dataKey="memory" stroke="hsl(var(--chart-2))" fillOpacity={1} fill="url(#colorMemory)" name="Memory Usage (%)" />
-                  </AreaChart>
+                  <ChartContainer config={chartConfig}>
+                    <AreaChart data={resourceUsage}>
+                      <defs>
+                        <linearGradient id="colorCpu" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.8}/>
+                          <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0}/>
+                        </linearGradient>
+                        <linearGradient id="colorMemory" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="hsl(var(--chart-2))" stopOpacity={0.8}/>
+                          <stop offset="95%" stopColor="hsl(var(--chart-2))" stopOpacity={0}/>
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
+                      <XAxis dataKey="time" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} />
+                      <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} unit="%" />
+                      <Tooltip
+                        cursor={{ fill: 'hsl(var(--accent))' }}
+                        content={<ChartTooltipContent indicator="dot" />}
+                      />
+                      <Legend />
+                      <Area type="monotone" dataKey="cpu" stroke="hsl(var(--primary))" fillOpacity={1} fill="url(#colorCpu)" name="CPU Usage (%)" />
+                      <Area type="monotone" dataKey="memory" stroke="hsl(var(--chart-2))" fillOpacity={1} fill="url(#colorMemory)" name="Memory Usage (%)" />
+                    </AreaChart>
+                  </ChartContainer>
                 </ResponsiveContainer>
               </div>
             </CardContent>
