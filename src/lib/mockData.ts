@@ -1,4 +1,4 @@
-import { Container, HostStats, ResourceUsage, ContainerDetails, LogEntry, ContainerEvent, DockerImage, DockerVolume, DockerNetwork } from './types';
+import { Container, HostStats, ResourceUsage, ContainerDetails, LogEntry, ContainerEvent, DockerImage, DockerVolume, DockerNetwork, Alert, HostDetails, ActivityEvent } from './types';
 export const mockContainers: Container[] = [
   {
     id: 'a1b2c3d4e5f6',
@@ -91,6 +91,8 @@ export const mockResourceUsage: ResourceUsage[] = [
 export const mockSummary = {
   containers: {
     running: mockContainers.filter(c => c.status === 'running').length,
+    exited: mockContainers.filter(c => c.status === 'exited').length,
+    paused: mockContainers.filter(c => c.status === 'paused').length,
     total: mockContainers.length,
   },
   images: 25,
@@ -165,4 +167,22 @@ export const mockNetworks: DockerNetwork[] = [
   { id: 'c8d9e0f1a2b3', name: 'host', driver: 'host', scope: 'local' },
   { id: 'd9e0f1a2b3c4', name: 'none', driver: 'null', scope: 'local' },
   { id: 'e0f1a2b3c4d5', name: 'app_network', driver: 'bridge', scope: 'local' },
+];
+export const mockAlerts: Alert[] = [
+  { id: '1', severity: 'critical', title: 'Container Restarting', message: 'Container "api-gateway" is in a restart loop.', containerId: 'e5f6a1b2c3d4' },
+  { id: '2', severity: 'warning', title: 'High CPU Usage', message: 'Host CPU usage is at 85%.', },
+  { id: '3', severity: 'warning', title: 'Dangling Images', message: 'Found 3 dangling images that can be pruned.', },
+];
+export const mockHostDetails: HostDetails = {
+  hostname: 'docker-host-01',
+  os: 'Ubuntu 22.04.1 LTS',
+  dockerVersion: '24.0.5',
+  uptime: '2 weeks, 3 days',
+  connectionMode: 'Docker Socket (/var/run/docker.sock)',
+};
+export const mockRecentActivity: ActivityEvent[] = [
+  { id: '1', timestamp: '2023-10-27T10:00:00Z', type: 'container', action: 'started', message: 'Container "web-server-prod" started' },
+  { id: '2', timestamp: '2023-10-27T09:30:00Z', type: 'image', action: 'pulled', message: 'Image "nginx:1.25-alpine" pulled successfully' },
+  { id: '3', timestamp: '2023-10-27T09:00:00Z', type: 'container', action: 'stopped', message: 'Container "worker-jobs" exited with code 0' },
+  { id: '4', timestamp: '2023-10-26T18:00:00Z', type: 'volume', action: 'created', message: 'Volume "new_data_volume" created' },
 ];

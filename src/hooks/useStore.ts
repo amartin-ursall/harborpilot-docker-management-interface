@@ -1,6 +1,6 @@
 import { create } from 'zustand';
-import { mockContainers, mockHostStats, mockResourceUsage, mockSummary, mockContainerDetails, mockImages, mockVolumes, mockNetworks } from '@/lib/mockData';
-import { Container, HostStats, ResourceUsage, ContainerDetails, DockerImage, DockerVolume, DockerNetwork } from '@/lib/types';
+import { mockContainers, mockHostStats, mockResourceUsage, mockSummary, mockContainerDetails, mockImages, mockVolumes, mockNetworks, mockAlerts, mockHostDetails, mockRecentActivity } from '@/lib/mockData';
+import { Container, HostStats, ResourceUsage, ContainerDetails, DockerImage, DockerVolume, DockerNetwork, ContainerSummary, Alert, HostDetails as HostDetailsType, ActivityEvent } from '@/lib/types';
 type AppState = {
   containers: Container[];
   images: DockerImage[];
@@ -9,11 +9,14 @@ type AppState = {
   hostStats: HostStats;
   resourceUsage: ResourceUsage[];
   summary: {
-    containers: { running: number; total: number };
+    containers: ContainerSummary;
     images: number;
     volumes: number;
     networks: number;
   };
+  alerts: Alert[];
+  hostDetails: HostDetailsType;
+  recentActivity: ActivityEvent[];
   selectedContainer: ContainerDetails | null;
   isDetailsPanelOpen: boolean;
   fetchContainers: () => void;
@@ -31,6 +34,9 @@ export const useStore = create<AppState>((set, get) => ({
   hostStats: mockHostStats,
   resourceUsage: mockResourceUsage,
   summary: mockSummary,
+  alerts: mockAlerts,
+  hostDetails: mockHostDetails,
+  recentActivity: mockRecentActivity,
   selectedContainer: null,
   isDetailsPanelOpen: false,
   fetchContainers: () => set({ containers: mockContainers }),

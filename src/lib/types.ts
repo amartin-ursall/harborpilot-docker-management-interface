@@ -74,3 +74,30 @@ export interface ContainerEvent {
   status: string;
   message: string;
 }
+export interface ContainerSummary {
+  running: number;
+  exited: number;
+  paused: number;
+  total: number;
+}
+export interface Alert {
+  id: string;
+  severity: 'critical' | 'warning';
+  title: string;
+  message: string;
+  containerId?: string;
+}
+export interface HostDetails {
+  hostname: string;
+  os: string;
+  dockerVersion: string;
+  uptime: string;
+  connectionMode: string;
+}
+export interface ActivityEvent {
+  id: string;
+  timestamp: string;
+  type: 'container' | 'image' | 'volume' | 'network';
+  action: 'created' | 'started' | 'stopped' | 'deleted' | 'pulled' | 'pruned';
+  message: string;
+}
