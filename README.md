@@ -2,7 +2,7 @@
 
 HarborPilot is a professional-grade, visually stunning web UI for Docker, built to run on the Cloudflare edge network. It provides a comprehensive dashboard for at-a-glance monitoring of host resources and container states. The application features detailed management views for containers, images, volumes, and networks, alongside interactive tools like a real-time log viewer and an integrated web console. The design prioritizes clarity, efficiency, and visual excellence, with an information-dense layout that empowers developers and DevOps engineers to manage their containerized applications with precision and ease. Its responsive, modern interface ensures a seamless experience across all devices.
 
-[cloudflarebutton]
+[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/amartin-ursall/harborpilot-docker-management-interface)
 
 ## ✨ Key Features
 
@@ -79,7 +79,7 @@ This application is designed to be deployed on the Cloudflare network.
 
 You can also deploy this project directly to your Cloudflare account by clicking the button below.
 
-[cloudflarebutton]
+[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/amartin-ursall/harborpilot-docker-management-interface)
 
 ## 📜 Available Scripts
 
