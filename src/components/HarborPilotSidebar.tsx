@@ -28,7 +28,7 @@ export function HarborPilotSidebar() {
                       'flex items-center px-4 py-2.5 text-sm font-medium rounded-md transition-colors duration-200',
                       isActive
                         ? 'bg-primary text-primary-foreground shadow-md'
-                        : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
+                        : 'text-foreground/80 hover:bg-accent hover:text-accent-foreground'
                     )
                   }
                 >
