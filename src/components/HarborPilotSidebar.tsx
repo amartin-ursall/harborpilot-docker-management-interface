@@ -1,5 +1,14 @@
 import { NavLink } from 'react-router-dom';
-import { Ship } from 'lucide-react';
+import {
+  LayoutDashboard,
+  Container,
+  Image,
+  Database,
+  Network,
+  FileText,
+  Settings,
+  Ship,
+} from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
   Tooltip,
@@ -7,7 +16,15 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { navItems } from '@/lib/nav-items';
+const navItems = [
+  { to: '/', icon: LayoutDashboard, label: 'Dashboard' },
+  { to: '/containers', icon: Container, label: 'Containers' },
+  { to: '/images', icon: Image, label: 'Images' },
+  { to: '/volumes', icon: Database, label: 'Volumes' },
+  { to: '/networks', icon: Network, label: 'Networks' },
+  { to: '/logs', icon: FileText, label: 'Global Logs' },
+  { to: '/settings', icon: Settings, label: 'Settings' },
+];
 export function HarborPilotSidebar() {
   return (
     <aside className="hidden md:flex md:flex-col md:w-64 bg-card border-r border-border fixed h-full">
@@ -28,7 +45,7 @@ export function HarborPilotSidebar() {
                       'flex items-center px-4 py-2.5 text-sm font-medium rounded-md transition-colors duration-200',
                       isActive
                         ? 'bg-primary text-primary-foreground shadow-md'
-                        : 'text-foreground/80 hover:bg-accent hover:text-accent-foreground'
+                        : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
                     )
                   }
                 >
