@@ -1,4 +1,4 @@
-import { Container, HostStats, ResourceUsage } from './types';
+import { Container, HostStats, ResourceUsage, ContainerDetails, LogEntry, ContainerEvent } from './types';
 export const mockContainers: Container[] = [
   {
     id: 'a1b2c3d4e5f6',
@@ -97,3 +97,51 @@ export const mockSummary = {
   volumes: 12,
   networks: 8,
 };
+export const mockContainerDetails: ContainerDetails = {
+  id: 'a1b2c3d4e5f6',
+  name: 'web-server-prod',
+  image: 'nginx:latest',
+  status: 'running',
+  uptime: '3 days',
+  restartPolicy: 'always',
+  ports: [{ privatePort: 80, publicPort: 8080, type: 'tcp' }],
+  environment: {
+    'NGINX_HOST': 'example.com',
+    'NGINX_PORT': '80',
+    'PATH': '/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin',
+  },
+  volumes: [
+    { hostPath: '/var/www/html', containerPath: '/usr/share/nginx/html' },
+    { hostPath: '/etc/nginx/conf.d', containerPath: '/etc/nginx/conf.d' },
+  ],
+  network: {
+    ipAddress: '172.17.0.2',
+    gateway: '172.17.0.1',
+    macAddress: '02:42:ac:11:00:02',
+  },
+};
+export const mockContainerLogs: LogEntry[] = [
+  { timestamp: '2023-10-27T10:00:00Z', message: 'Server listening on port 80', level: 'info' },
+  { timestamp: '2023-10-27T10:00:01Z', message: 'GET / HTTP/1.1" 200', level: 'info' },
+  { timestamp: '2023-10-27T10:00:02Z', message: 'GET /styles.css HTTP/1.1" 200', level: 'info' },
+  { timestamp: '2023-10-27T10:01:05Z', message: 'File not found: /favicon.ico', level: 'warn' },
+  { timestamp: '2023-10-27T10:01:06Z', message: 'GET /favicon.ico HTTP/1.1" 404', level: 'info' },
+  { timestamp: '2023-10-27T10:02:10Z', message: 'Upstream connection error', level: 'error' },
+];
+export const mockContainerInspect = {
+  "Id": "a1b2c3d4e5f6...",
+  "Created": "2023-10-24T10:00:00Z",
+  "Path": "nginx",
+  "Args": ["-g", "daemon off;"],
+  "State": { "Status": "running", "Running": true, "Pid": 12345 },
+  "Image": "sha256:f6d0b1e8ec93...",
+  "HostConfig": { "RestartPolicy": { "Name": "always", "MaximumRetryCount": 0 } },
+  "GraphDriver": { "Data": { "LowerDir": "/var/lib/docker/overlay2/..." } },
+};
+export const mockContainerEvents: ContainerEvent[] = [
+  { timestamp: '2023-10-24T10:00:00Z', status: 'create', message: 'Container a1b2c3d4e5f6 created' },
+  { timestamp: '2023-10-24T10:00:01Z', status: 'start', message: 'Container a1b2c3d4e5f6 started' },
+  { timestamp: '2023-10-26T05:30:00Z', status: 'health_status: healthy', message: 'Health check passed' },
+  { timestamp: '2023-10-27T08:00:00Z', status: 'kill', message: 'Container killed with signal 9' },
+  { timestamp: '2023-10-27T08:00:05Z', status: 'start', message: 'Container restarted' },
+];

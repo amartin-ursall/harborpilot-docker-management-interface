@@ -47,3 +47,29 @@ export interface ResourceUsage {
   cpu: number;
   memory: number;
 }
+export interface ContainerDetails {
+  id: string;
+  name: string;
+  image: string;
+  status: ContainerStatus;
+  uptime: string;
+  restartPolicy: 'no' | 'on-failure' | 'unless-stopped' | 'always';
+  ports: Port[];
+  environment: { [key: string]: string };
+  volumes: { hostPath: string; containerPath: string }[];
+  network: {
+    ipAddress: string;
+    gateway: string;
+    macAddress: string;
+  };
+}
+export interface LogEntry {
+  timestamp: string;
+  message: string;
+  level?: 'info' | 'warn' | 'error';
+}
+export interface ContainerEvent {
+  timestamp: string;
+  status: string;
+  message: string;
+}

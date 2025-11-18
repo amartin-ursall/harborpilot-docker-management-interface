@@ -42,6 +42,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
+import { ContainerDetailsSheet } from '@/components/ContainerDetailsSheet';
 const statusStyles: { [key in ContainerStatus]: string } = {
   running: 'bg-green-500/20 text-green-500 border-green-500/30',
   exited: 'bg-gray-500/20 text-gray-500 border-gray-500/30',
@@ -90,10 +91,17 @@ export function ContainersPage() {
           </CardContent>
         </Card>
       </div>
+      <ContainerDetailsSheet />
     </div>
   );
 }
 function ContainerRow({ container }: { container: Container }) {
+  const selectContainer = useStore((s) => s.selectContainer);
+  const setDetailsPanelOpen = useStore((s) => s.setDetailsPanelOpen);
+  const handleOpenDetails = () => {
+    selectContainer(container.id);
+    setDetailsPanelOpen(true);
+  };
   return (
     <TableRow className="hover:bg-accent transition-colors">
       <TableCell>
@@ -105,7 +113,11 @@ function ContainerRow({ container }: { container: Container }) {
           {container.status}
         </Badge>
       </TableCell>
-      <TableCell className="font-medium font-mono text-sm">{container.name}</TableCell>
+      <TableCell className="font-medium font-mono text-sm">
+        <button onClick={handleOpenDetails} className="hover:underline">
+          {container.name}
+        </button>
+      </TableCell>
       <TableCell className="text-muted-foreground">{container.image}</TableCell>
       <TableCell>
         {container.ports
@@ -127,9 +139,9 @@ function ContainerRow({ container }: { container: Container }) {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem><FileText className="mr-2 h-4 w-4" /> Logs</DropdownMenuItem>
-              <DropdownMenuItem><Terminal className="mr-2 h-4 w-4" /> Console</DropdownMenuItem>
-              <DropdownMenuItem><Info className="mr-2 h-4 w-4" /> Details</DropdownMenuItem>
+              <DropdownMenuItem onClick={handleOpenDetails}><FileText className="mr-2 h-4 w-4" /> Logs</DropdownMenuItem>
+              <DropdownMenuItem onClick={handleOpenDetails}><Terminal className="mr-2 h-4 w-4" /> Console</DropdownMenuItem>
+              <DropdownMenuItem onClick={handleOpenDetails}><Info className="mr-2 h-4 w-4" /> Details</DropdownMenuItem>
               <DropdownMenuItem><Pause className="mr-2 h-4 w-4" /> Pause</DropdownMenuItem>
               <DropdownMenuItem className="text-destructive focus:text-destructive">
                 <Trash2 className="mr-2 h-4 w-4" /> Delete
