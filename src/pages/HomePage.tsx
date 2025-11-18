@@ -3,6 +3,7 @@ import { HarborPilotSidebar } from '@/components/HarborPilotSidebar';
 import { HarborPilotHeader } from '@/components/HarborPilotHeader';
 import { Toaster } from '@/components/ui/sonner';
 import { useTheme } from '@/hooks/use-theme';
+import { ConfirmationDialog } from '@/components/ConfirmationDialog';
 export function HomePage() {
   const { isDark } = useTheme();
   return (
@@ -15,6 +16,7 @@ export function HomePage() {
         </div>
       </main>
       <Toaster richColors theme={isDark ? 'dark' : 'light'} />
+      <ConfirmationDialog />
     </div>
   );
 }

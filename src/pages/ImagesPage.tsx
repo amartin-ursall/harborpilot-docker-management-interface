@@ -4,7 +4,6 @@ import {
   MoreVertical,
   Search,
   Info,
-  Layers,
   Power,
   Container,
 } from 'lucide-react';
@@ -33,13 +32,36 @@ import {
 } from '@/components/ui/table';
 import { useStore } from '@/hooks/useStore';
 import { DockerImage } from '@/lib/types';
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
+import { toast } from 'sonner';
 export function ImagesPage() {
   const images = useStore((s) => s.images);
+  const imageFilter = useStore((s) => s.imageFilter);
+  const setImageFilter = useStore((s) => s.setImageFilter);
+  const showDialog = useStore((s) => s.showDialog);
   const fetchImages = useStore.getState().fetchImages;
   useEffect(() => {
     fetchImages();
   }, [fetchImages]);
+  const filteredImages = useMemo(() => {
+    const filter = imageFilter.toLowerCase();
+    if (!filter) return images;
+    return images.filter(i => 
+      i.name.toLowerCase().includes(filter) ||
+      i.tag.toLowerCase().includes(filter) ||
+      i.id.toLowerCase().includes(filter)
+    );
+  }, [images, imageFilter]);
+  const handlePrune = () => {
+    showDialog({
+      title: 'Prune Unused Images?',
+      description: 'This will remove all dangling images (images not tagged or associated with a container). This action cannot be undone.',
+      onConfirm: () => {
+        console.log('Pruning images');
+        toast.success('Unused images pruned successfully.');
+      },
+    });
+  };
   return (
     <div className="max-w-full mx-auto animate-fade-in">
       <div className="py-8 md:py-10 px-4 sm:px-6 lg:px-8">
@@ -50,10 +72,15 @@ export function ImagesPage() {
               <div className="flex items-center gap-2 w-full sm:w-auto">
                 <div className="relative w-full sm:w-64">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input placeholder="Search images..." className="pl-9" />
+                  <Input 
+                    placeholder="Search images..." 
+                    className="pl-9"
+                    value={imageFilter}
+                    onChange={(e) => setImageFilter(e.target.value)}
+                  />
                 </div>
                 <Button><Download className="mr-2 h-4 w-4" /> Pull Image</Button>
-                <Button variant="destructive"><Power className="mr-2 h-4 w-4" /> Prune</Button>
+                <Button variant="destructive" onClick={handlePrune}><Power className="mr-2 h-4 w-4" /> Prune</Button>
               </div>
             </div>
           </CardHeader>
@@ -71,7 +98,7 @@ export function ImagesPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {images.map((image) => (
+                  {filteredImages.map((image) => (
                     <ImageRow key={image.id} image={image} />
                   ))}
                 </TableBody>
@@ -85,6 +112,17 @@ export function ImagesPage() {
 }
 function ImageRow({ image }: { image: DockerImage }) {
   const isDangling = image.name === '<none>';
+  const showDialog = useStore((s) => s.showDialog);
+  const handleDelete = () => {
+    showDialog({
+      title: `Delete Image: ${image.name}:${image.tag}?`,
+      description: 'This action is irreversible. If any containers are using this image, they may fail. Are you sure you want to proceed?',
+      onConfirm: () => {
+        console.log(`Deleting image ${image.id}`);
+        toast.success(`Image "${image.name}:${image.tag}" deleted successfully.`);
+      },
+    });
+  };
   return (
     <TableRow className="hover:bg-accent transition-colors">
       <TableCell className="font-medium">
@@ -107,7 +145,7 @@ function ImageRow({ image }: { image: DockerImage }) {
           <DropdownMenuContent align="end">
             <DropdownMenuItem><Container className="mr-2 h-4 w-4" /> Create Container</DropdownMenuItem>
             <DropdownMenuItem><Info className="mr-2 h-4 w-4" /> Inspect</DropdownMenuItem>
-            <DropdownMenuItem className="text-destructive focus:text-destructive">
+            <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={handleDelete}>
               <Trash2 className="mr-2 h-4 w-4" /> Delete
             </DropdownMenuItem>
           </DropdownMenuContent>

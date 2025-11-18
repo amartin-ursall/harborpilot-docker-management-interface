@@ -28,13 +28,6 @@ export function ConfirmationDialog() {
           <AlertDialogDescription>
             {dialog.description}
           </AlertDialogDescription>
-          {dialog.summary && (
-            <div className="pt-4">
-              <div className="bg-muted/50 p-3 rounded-lg border text-muted-foreground">
-                {dialog.summary}
-              </div>
-            </div>
-          )}
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Cancel</AlertDialogCancel>

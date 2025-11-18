@@ -1,6 +1,13 @@
 import { create } from 'zustand';
 import { mockContainers, mockHostStats, mockResourceUsage, mockSummary, mockContainerDetails, mockImages, mockVolumes, mockNetworks, mockAlerts, mockHostDetails, mockRecentActivity } from '@/lib/mockData';
 import { Container, HostStats, ResourceUsage, ContainerDetails, DockerImage, DockerVolume, DockerNetwork, ContainerSummary, Alert, HostDetails as HostDetailsType, ActivityEvent } from '@/lib/types';
+import { toast } from 'sonner';
+type DialogState = {
+  isOpen: boolean;
+  title: string;
+  description: string;
+  onConfirm: () => void;
+};
 type AppState = {
   containers: Container[];
   images: DockerImage[];
@@ -19,12 +26,23 @@ type AppState = {
   recentActivity: ActivityEvent[];
   selectedContainer: ContainerDetails | null;
   isDetailsPanelOpen: boolean;
+  containerFilter: string;
+  imageFilter: string;
+  volumeFilter: string;
+  networkFilter: string;
+  dialog: DialogState;
   fetchContainers: () => void;
   fetchImages: () => void;
   fetchVolumes: () => void;
   fetchNetworks: () => void;
   selectContainer: (id: string | null) => void;
   setDetailsPanelOpen: (isOpen: boolean) => void;
+  setContainerFilter: (filter: string) => void;
+  setImageFilter: (filter: string) => void;
+  setVolumeFilter: (filter: string) => void;
+  setNetworkFilter: (filter: string) => void;
+  showDialog: (options: Omit<DialogState, 'isOpen'>) => void;
+  hideDialog: () => void;
 };
 export const useStore = create<AppState>((set, get) => ({
   containers: [],
@@ -39,6 +57,16 @@ export const useStore = create<AppState>((set, get) => ({
   recentActivity: mockRecentActivity,
   selectedContainer: null,
   isDetailsPanelOpen: false,
+  containerFilter: '',
+  imageFilter: '',
+  volumeFilter: '',
+  networkFilter: '',
+  dialog: {
+    isOpen: false,
+    title: '',
+    description: '',
+    onConfirm: () => {},
+  },
   fetchContainers: () => set({ containers: mockContainers }),
   fetchImages: () => set({ images: mockImages }),
   fetchVolumes: () => set({ volumes: mockVolumes }),
@@ -59,6 +87,16 @@ export const useStore = create<AppState>((set, get) => ({
       set({ selectedContainer: null });
     }
   },
+  setContainerFilter: (filter: string) => set({ containerFilter: filter }),
+  setImageFilter: (filter: string) => set({ imageFilter: filter }),
+  setVolumeFilter: (filter: string) => set({ volumeFilter: filter }),
+  setNetworkFilter: (filter: string) => set({ networkFilter: filter }),
+  showDialog: ({ title, description, onConfirm }) => set({
+    dialog: { isOpen: true, title, description, onConfirm }
+  }),
+  hideDialog: () => set(state => ({
+    dialog: { ...state.dialog, isOpen: false }
+  })),
 }));
 // Initialize store with data
 useStore.getState().fetchContainers();
