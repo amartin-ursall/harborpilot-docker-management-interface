@@ -181,7 +181,7 @@ export const useStore = create<AppState>((set, get) => ({
     get().showDialog({
       title: 'Prune Unused Images?',
       description: 'This will remove all dangling images (images not tagged or associated with a container). This action cannot be undone.',
-      summary: <p>{danglingImages.length} dangling image(s) will be removed.</p>,
+      summary: (<p>{danglingImages.length} dangling image(s) will be removed.</p>),
       onConfirm: () => {
         set(state => ({
           images: state.images.filter(i => i.name !== '<none>')
