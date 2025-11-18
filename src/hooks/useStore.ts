@@ -10,6 +10,12 @@ type DialogState = {
   summary?: React.ReactNode;
   onConfirm: () => void;
 };
+type ModalState = {
+  isNewContainerOpen: boolean;
+  isPullImageOpen: boolean;
+  isNewVolumeOpen: boolean;
+  isNewNetworkOpen: boolean;
+};
 type AppState = {
   containers: Container[];
   images: DockerImage[];
@@ -35,6 +41,7 @@ type AppState = {
   volumeFilter: string;
   networkFilter: string;
   dialog: DialogState;
+  modals: ModalState;
   isFetchingContainers: boolean;
   isFetchingImages: boolean;
   isFetchingVolumes: boolean;
@@ -63,6 +70,7 @@ type AppState = {
   deleteVolume: (name: string) => void;
   deleteNetwork: (id: string) => void;
   pruneSystem: () => void;
+  setModalOpen: (modal: keyof ModalState, isOpen: boolean) => void;
 };
 export const useStore = create<AppState>((set, get) => ({
   containers: [],
@@ -93,7 +101,14 @@ export const useStore = create<AppState>((set, get) => ({
     isOpen: false,
     title: '',
     description: '',
+    summary: undefined,
     onConfirm: () => {},
+  },
+  modals: {
+    isNewContainerOpen: false,
+    isPullImageOpen: false,
+    isNewVolumeOpen: false,
+    isNewNetworkOpen: false,
   },
   fetchContainers: () => {
     set({ isFetchingContainers: true });
@@ -200,6 +215,14 @@ export const useStore = create<AppState>((set, get) => ({
         toast.success('System pruned successfully.');
       },
     });
+  },
+  setModalOpen: (modal, isOpen) => {
+    set(state => ({
+      modals: {
+        ...state.modals,
+        [modal]: isOpen,
+      }
+    }));
   },
 }));
 // Initialize store with data

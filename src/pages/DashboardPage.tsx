@@ -89,6 +89,7 @@ export function DashboardPage() {
   const pruneSystem = useStore((s) => s.pruneSystem);
   const selectContainerAndOpenDetails = useStore((s) => s.selectContainerAndOpenDetails);
   const setImageDisplayFilter = useStore((s) => s.setImageDisplayFilter);
+  const setModalOpen = useStore((s) => s.setModalOpen);
   const navigate = useNavigate();
   const [timeRange, setTimeRange] = useState('1h');
   const chartConfig = {
@@ -183,10 +184,10 @@ export function DashboardPage() {
             <Card>
               <CardHeader><CardTitle>Quick Actions</CardTitle></CardHeader>
               <CardContent className="grid grid-cols-2 gap-4">
-                <Button variant="outline"><PlusCircle className="mr-2 h-4 w-4" /> New Container</Button>
-                <Button variant="outline"><Download className="mr-2 h-4 w-4" /> Pull Image</Button>
+                <Button variant="outline" onClick={() => setModalOpen('isNewContainerOpen', true)}><PlusCircle className="mr-2 h-4 w-4" /> New Container</Button>
+                <Button variant="outline" onClick={() => setModalOpen('isPullImageOpen', true)}><Download className="mr-2 h-4 w-4" /> Pull Image</Button>
                 <Button variant="destructive" onClick={pruneSystem}><Power className="mr-2 h-4 w-4" /> Prune System</Button>
-                <Button variant="outline"><FileText className="mr-2 h-4 w-4" /> Global Logs</Button>
+                <Button variant="outline" onClick={() => navigate('/logs')}><FileText className="mr-2 h-4 w-4" /> Global Logs</Button>
               </CardContent>
             </Card>
             <Card>

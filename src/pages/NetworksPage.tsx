@@ -40,6 +40,7 @@ export function NetworksPage() {
   const setNetworkFilter = useStore((s) => s.setNetworkFilter);
   const fetchNetworks = useStore.getState().fetchNetworks;
   const isFetchingNetworks = useStore((s) => s.isFetchingNetworks);
+  const setModalOpen = useStore((s) => s.setModalOpen);
   useEffect(() => {
     fetchNetworks();
   }, [fetchNetworks]);
@@ -68,7 +69,7 @@ export function NetworksPage() {
                     onChange={(e) => setNetworkFilter(e.target.value)}
                   />
                 </div>
-                <Button><PlusCircle className="mr-2 h-4 w-4" /> New Network</Button>
+                <Button onClick={() => setModalOpen('isNewNetworkOpen', true)}><PlusCircle className="mr-2 h-4 w-4" /> New Network</Button>
               </div>
             </div>
           </CardHeader>
@@ -98,7 +99,7 @@ export function NetworksPage() {
                           icon={NetworkIcon}
                           title="No networks found"
                           description="You don't have any custom networks. Create one to connect containers."
-                          action={{ label: 'New Network', onClick: () => {} }}
+                          action={{ label: 'New Network', onClick: () => setModalOpen('isNewNetworkOpen', true) }}
                         />
                       </TableCell>
                     </TableRow>

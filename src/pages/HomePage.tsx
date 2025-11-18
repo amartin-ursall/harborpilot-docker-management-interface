@@ -4,6 +4,10 @@ import { HarborPilotHeader } from '@/components/HarborPilotHeader';
 import { Toaster } from '@/components/ui/sonner';
 import { useTheme } from '@/hooks/use-theme';
 import { ConfirmationDialog } from '@/components/ConfirmationDialog';
+import { NewContainerDialog } from '@/components/modals/NewContainerDialog';
+import { PullImageDialog } from '@/components/modals/PullImageDialog';
+import { NewVolumeDialog } from '@/components/modals/NewVolumeDialog';
+import { NewNetworkDialog } from '@/components/modals/NewNetworkDialog';
 export function HomePage() {
   const { isDark } = useTheme();
   return (
@@ -17,6 +21,10 @@ export function HomePage() {
       </main>
       <Toaster richColors theme={isDark ? 'dark' : 'light'} />
       <ConfirmationDialog />
+      <NewContainerDialog />
+      <PullImageDialog />
+      <NewVolumeDialog />
+      <NewNetworkDialog />
     </div>
   );
 }

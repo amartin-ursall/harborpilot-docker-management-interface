@@ -42,12 +42,12 @@ export function ImagesPage() {
   const images = useStore((s) => s.images);
   const imageFilter = useStore((s) => s.imageFilter);
   const setImageFilter = useStore((s) => s.setImageFilter);
-  const showDialog = useStore((s) => s.showDialog);
   const pruneImages = useStore((s) => s.pruneImages);
   const fetchImages = useStore.getState().fetchImages;
   const isFetchingImages = useStore((s) => s.isFetchingImages);
   const imageDisplayFilter = useStore((s) => s.imageDisplayFilter);
   const setImageDisplayFilter = useStore((s) => s.setImageDisplayFilter);
+  const setModalOpen = useStore((s) => s.setModalOpen);
   useEffect(() => {
     fetchImages();
   }, [fetchImages]);
@@ -81,7 +81,7 @@ export function ImagesPage() {
                     onChange={(e) => setImageFilter(e.target.value)}
                   />
                 </div>
-                <Button><Download className="mr-2 h-4 w-4" /> Pull Image</Button>
+                <Button onClick={() => setModalOpen('isPullImageOpen', true)}><Download className="mr-2 h-4 w-4" /> Pull Image</Button>
                 <Button variant="destructive" onClick={pruneImages}><Power className="mr-2 h-4 w-4" /> Prune</Button>
               </div>
             </div>
@@ -124,7 +124,7 @@ export function ImagesPage() {
                           icon={ImageIcon}
                           title="No images found"
                           description="You don't have any images. Try pulling one from a registry."
-                          action={{ label: 'Pull Image', onClick: () => {} }}
+                          action={{ label: 'Pull Image', onClick: () => setModalOpen('isPullImageOpen', true) }}
                         />
                       </TableCell>
                     </TableRow>

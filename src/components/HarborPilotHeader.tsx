@@ -2,7 +2,7 @@ import {
   ChevronDown,
   PlusCircle,
   Power,
-  RefreshCw,
+  Download,
   Signal,
   SignalZero,
 } from 'lucide-react';
@@ -44,6 +44,7 @@ export function HarborPilotHeader() {
   const pruneSystem = useStore((s) => s.pruneSystem);
   const connectionStatus = useStore((s) => s.connectionStatus);
   const lastUpdate = useStore((s) => s.lastUpdate);
+  const setModalOpen = useStore((s) => s.setModalOpen);
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/80 backdrop-blur-sm px-4 md:px-6">
       <MobileSidebar />
@@ -92,12 +93,12 @@ export function HarborPilotHeader() {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setModalOpen('isNewContainerOpen', true)}>
               <PlusCircle className="mr-2 h-4 w-4" />
               New Container
             </DropdownMenuItem>
-            <DropdownMenuItem>
-              <RefreshCw className="mr-2 h-4 w-4" />
+            <DropdownMenuItem onClick={() => setModalOpen('isPullImageOpen', true)}>
+              <Download className="mr-2 h-4 w-4" />
               Pull Image
             </DropdownMenuItem>
             <DropdownMenuItem

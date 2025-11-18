@@ -41,6 +41,7 @@ export function VolumesPage() {
   const setVolumeFilter = useStore((s) => s.setVolumeFilter);
   const fetchVolumes = useStore.getState().fetchVolumes;
   const isFetchingVolumes = useStore((s) => s.isFetchingVolumes);
+  const setModalOpen = useStore((s) => s.setModalOpen);
   useEffect(() => {
     fetchVolumes();
   }, [fetchVolumes]);
@@ -66,7 +67,7 @@ export function VolumesPage() {
                     onChange={(e) => setVolumeFilter(e.target.value)}
                   />
                 </div>
-                <Button><PlusCircle className="mr-2 h-4 w-4" /> New Volume</Button>
+                <Button onClick={() => setModalOpen('isNewVolumeOpen', true)}><PlusCircle className="mr-2 h-4 w-4" /> New Volume</Button>
               </div>
             </div>
           </CardHeader>
@@ -96,7 +97,7 @@ export function VolumesPage() {
                           icon={Database}
                           title="No volumes found"
                           description="Create a volume to persist data for your containers."
-                          action={{ label: 'New Volume', onClick: () => {} }}
+                          action={{ label: 'New Volume', onClick: () => setModalOpen('isNewVolumeOpen', true) }}
                         />
                       </TableCell>
                     </TableRow>

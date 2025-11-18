@@ -60,6 +60,7 @@ export function ContainersPage() {
   const containerFilter = useStore((s) => s.containerFilter);
   const setContainerFilter = useStore((s) => s.setContainerFilter);
   const isFetchingContainers = useStore((s) => s.isFetchingContainers);
+  const setModalOpen = useStore((s) => s.setModalOpen);
   const filteredContainers = useMemo(() => {
     const filter = containerFilter.toLowerCase();
     if (!filter) return containers;
@@ -86,7 +87,7 @@ export function ContainersPage() {
                     onChange={(e) => setContainerFilter(e.target.value)}
                   />
                 </div>
-                <Button>+ New Container</Button>
+                <Button onClick={() => setModalOpen('isNewContainerOpen', true)}>+ New Container</Button>
               </div>
             </div>
           </CardHeader>
@@ -117,7 +118,7 @@ export function ContainersPage() {
                           icon={ContainerIcon}
                           title="No containers found"
                           description="You don't have any containers matching the current filter. Try creating one!"
-                          action={{ label: 'New Container', onClick: () => {} }}
+                          action={{ label: 'New Container', onClick: () => setModalOpen('isNewContainerOpen', true) }}
                         />
                       </TableCell>
                     </TableRow>
