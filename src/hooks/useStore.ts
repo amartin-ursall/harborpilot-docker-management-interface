@@ -2,10 +2,12 @@ import { create } from 'zustand';
 import { mockContainers, mockHostStats, mockResourceUsage, mockSummary, mockContainerDetails, mockImages, mockVolumes, mockNetworks, mockAlerts, mockHostDetails, mockRecentActivity } from '@/lib/mockData';
 import { Container, HostStats, ResourceUsage, ContainerDetails, DockerImage, DockerVolume, DockerNetwork, ContainerSummary, Alert, HostDetails as HostDetailsType, ActivityEvent, ContainerStatus } from '@/lib/types';
 import { toast } from 'sonner';
+import React from 'react';
 type DialogState = {
   isOpen: boolean;
   title: string;
   description: string;
+  summary?: React.ReactNode;
   onConfirm: () => void;
 };
 type AppState = {
@@ -26,19 +28,30 @@ type AppState = {
   recentActivity: ActivityEvent[];
   selectedContainer: ContainerDetails | null;
   isDetailsPanelOpen: boolean;
+  detailsSheetDefaultTab: string;
   containerFilter: string;
   imageFilter: string;
+  imageDisplayFilter: 'all' | 'dangling';
   volumeFilter: string;
   networkFilter: string;
   dialog: DialogState;
+  isFetchingContainers: boolean;
+  isFetchingImages: boolean;
+  isFetchingVolumes: boolean;
+  isFetchingNetworks: boolean;
+  connectionStatus: 'connected' | 'disconnected';
+  lastUpdate: Date | null;
   fetchContainers: () => void;
   fetchImages: () => void;
   fetchVolumes: () => void;
   fetchNetworks: () => void;
   selectContainer: (id: string | null) => void;
   setDetailsPanelOpen: (isOpen: boolean) => void;
+  setDetailsSheetDefaultTab: (tab: string) => void;
+  selectContainerAndOpenDetails: (id: string, tab: string) => void;
   setContainerFilter: (filter: string) => void;
   setImageFilter: (filter: string) => void;
+  setImageDisplayFilter: (filter: 'all' | 'dangling') => void;
   setVolumeFilter: (filter: string) => void;
   setNetworkFilter: (filter: string) => void;
   showDialog: (options: Omit<DialogState, 'isOpen'>) => void;
@@ -64,20 +77,48 @@ export const useStore = create<AppState>((set, get) => ({
   recentActivity: mockRecentActivity,
   selectedContainer: null,
   isDetailsPanelOpen: false,
+  detailsSheetDefaultTab: 'overview',
   containerFilter: '',
   imageFilter: '',
+  imageDisplayFilter: 'all',
   volumeFilter: '',
   networkFilter: '',
+  isFetchingContainers: true,
+  isFetchingImages: true,
+  isFetchingVolumes: true,
+  isFetchingNetworks: true,
+  connectionStatus: 'connected',
+  lastUpdate: null,
   dialog: {
     isOpen: false,
     title: '',
     description: '',
     onConfirm: () => {},
   },
-  fetchContainers: () => set({ containers: mockContainers }),
-  fetchImages: () => set({ images: mockImages }),
-  fetchVolumes: () => set({ volumes: mockVolumes }),
-  fetchNetworks: () => set({ networks: mockNetworks }),
+  fetchContainers: () => {
+    set({ isFetchingContainers: true });
+    setTimeout(() => {
+      set({ containers: mockContainers, isFetchingContainers: false, lastUpdate: new Date() });
+    }, 500);
+  },
+  fetchImages: () => {
+    set({ isFetchingImages: true });
+    setTimeout(() => {
+      set({ images: mockImages, isFetchingImages: false, lastUpdate: new Date() });
+    }, 500);
+  },
+  fetchVolumes: () => {
+    set({ isFetchingVolumes: true });
+    setTimeout(() => {
+      set({ volumes: mockVolumes, isFetchingVolumes: false, lastUpdate: new Date() });
+    }, 500);
+  },
+  fetchNetworks: () => {
+    set({ isFetchingNetworks: true });
+    setTimeout(() => {
+      set({ networks: mockNetworks, isFetchingNetworks: false, lastUpdate: new Date() });
+    }, 500);
+  },
   selectContainer: (id: string | null) => {
     if (id === null) {
       set({ selectedContainer: null });
@@ -94,12 +135,19 @@ export const useStore = create<AppState>((set, get) => ({
       set({ selectedContainer: null });
     }
   },
+  setDetailsSheetDefaultTab: (tab) => set({ detailsSheetDefaultTab: tab }),
+  selectContainerAndOpenDetails: (id, tab) => {
+    get().selectContainer(id);
+    get().setDetailsSheetDefaultTab(tab);
+    get().setDetailsPanelOpen(true);
+  },
   setContainerFilter: (filter: string) => set({ containerFilter: filter }),
   setImageFilter: (filter: string) => set({ imageFilter: filter }),
+  setImageDisplayFilter: (filter) => set({ imageDisplayFilter: filter }),
   setVolumeFilter: (filter: string) => set({ volumeFilter: filter }),
   setNetworkFilter: (filter: string) => set({ networkFilter: filter }),
-  showDialog: ({ title, description, onConfirm }) => set({
-    dialog: { isOpen: true, title, description, onConfirm }
+  showDialog: ({ title, description, onConfirm, summary }) => set({
+    dialog: { isOpen: true, title, description, onConfirm, summary }
   }),
   hideDialog: () => set(state => ({
     dialog: { ...state.dialog, isOpen: false }
@@ -113,9 +161,20 @@ export const useStore = create<AppState>((set, get) => ({
   deleteImage: (id) => set(state => ({
     images: state.images.filter(i => i.id !== id)
   })),
-  pruneImages: () => set(state => ({
-    images: state.images.filter(i => i.name !== '<none>')
-  })),
+  pruneImages: () => {
+    const danglingImages = get().images.filter(i => i.name === '<none>');
+    get().showDialog({
+      title: 'Prune Unused Images?',
+      description: 'This will remove all dangling images (images not tagged or associated with a container). This action cannot be undone.',
+      summary: <p>{danglingImages.length} dangling image(s) will be removed.</p>,
+      onConfirm: () => {
+        set(state => ({
+          images: state.images.filter(i => i.name !== '<none>')
+        }));
+        toast.success('Unused images pruned successfully.');
+      },
+    });
+  },
   deleteVolume: (name) => set(state => ({
     volumes: state.volumes.filter(v => v.name !== name)
   })),
@@ -123,8 +182,24 @@ export const useStore = create<AppState>((set, get) => ({
     networks: state.networks.filter(n => n.id !== id)
   })),
   pruneSystem: () => {
-    get().pruneImages();
-    toast.success('System pruned successfully.');
+    const danglingImages = get().images.filter(i => i.name === '<none>');
+    get().showDialog({
+      title: 'Prune System?',
+      description: 'This will remove all stopped containers, dangling images, and unused networks and volumes. This action is irreversible.',
+      summary: (
+        <ul className="list-disc pl-5 text-sm">
+          <li>{danglingImages.length} dangling image(s) will be removed.</li>
+          <li>(Mock) Stopped containers will be removed.</li>
+          <li>(Mock) Unused networks will be removed.</li>
+        </ul>
+      ),
+      onConfirm: () => {
+        set(state => ({
+          images: state.images.filter(i => i.name !== '<none>')
+        }));
+        toast.success('System pruned successfully.');
+      },
+    });
   },
 }));
 // Initialize store with data

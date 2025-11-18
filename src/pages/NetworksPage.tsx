@@ -4,6 +4,7 @@ import {
   Search,
   Info,
   PlusCircle,
+  Network as NetworkIcon,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -31,11 +32,14 @@ import { useStore } from '@/hooks/useStore';
 import { DockerNetwork } from '@/lib/types';
 import { useEffect, useMemo } from 'react';
 import { toast } from 'sonner';
+import { Skeleton } from '@/components/ui/skeleton';
+import { EmptyState } from '@/components/EmptyState';
 export function NetworksPage() {
   const networks = useStore((s) => s.networks);
   const networkFilter = useStore((s) => s.networkFilter);
   const setNetworkFilter = useStore((s) => s.setNetworkFilter);
   const fetchNetworks = useStore.getState().fetchNetworks;
+  const isFetchingNetworks = useStore((s) => s.isFetchingNetworks);
   useEffect(() => {
     fetchNetworks();
   }, [fetchNetworks]);
@@ -81,9 +85,24 @@ export function NetworksPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredNetworks.map((network) => (
-                    <NetworkRow key={network.id} network={network} />
-                  ))}
+                  {isFetchingNetworks ? (
+                    Array.from({ length: 4 }).map((_, i) => <NetworkRowSkeleton key={i} />)
+                  ) : filteredNetworks.length > 0 ? (
+                    filteredNetworks.map((network) => (
+                      <NetworkRow key={network.id} network={network} />
+                    ))
+                  ) : (
+                    <TableRow>
+                      <TableCell colSpan={5}>
+                        <EmptyState
+                          icon={NetworkIcon}
+                          title="No networks found"
+                          description="You don't have any custom networks. Create one to connect containers."
+                          action={{ label: 'New Network', onClick: () => {} }}
+                        />
+                      </TableCell>
+                    </TableRow>
+                  )}
                 </TableBody>
               </Table>
             </div>
@@ -127,6 +146,17 @@ function NetworkRow({ network }: { network: DockerNetwork }) {
           </DropdownMenuContent>
         </DropdownMenu>
       </TableCell>
+    </TableRow>
+  );
+}
+function NetworkRowSkeleton() {
+  return (
+    <TableRow>
+      <TableCell><Skeleton className="h-5 w-32" /></TableCell>
+      <TableCell><Skeleton className="h-5 w-24" /></TableCell>
+      <TableCell><Skeleton className="h-5 w-20" /></TableCell>
+      <TableCell><Skeleton className="h-5 w-16" /></TableCell>
+      <TableCell className="text-right"><Skeleton className="h-8 w-8 inline-block" /></TableCell>
     </TableRow>
   );
 }

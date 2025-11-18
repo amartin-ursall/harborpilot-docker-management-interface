@@ -4,6 +4,7 @@ import {
   Search,
   Info,
   PlusCircle,
+  Database,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -32,11 +33,14 @@ import { DockerVolume } from '@/lib/types';
 import { useEffect, useMemo } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
+import { Skeleton } from '@/components/ui/skeleton';
+import { EmptyState } from '@/components/EmptyState';
 export function VolumesPage() {
   const volumes = useStore((s) => s.volumes);
   const volumeFilter = useStore((s) => s.volumeFilter);
   const setVolumeFilter = useStore((s) => s.setVolumeFilter);
   const fetchVolumes = useStore.getState().fetchVolumes;
+  const isFetchingVolumes = useStore((s) => s.isFetchingVolumes);
   useEffect(() => {
     fetchVolumes();
   }, [fetchVolumes]);
@@ -79,9 +83,24 @@ export function VolumesPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredVolumes.map((volume) => (
-                    <VolumeRow key={volume.name} volume={volume} />
-                  ))}
+                  {isFetchingVolumes ? (
+                    Array.from({ length: 4 }).map((_, i) => <VolumeRowSkeleton key={i} />)
+                  ) : filteredVolumes.length > 0 ? (
+                    filteredVolumes.map((volume) => (
+                      <VolumeRow key={volume.name} volume={volume} />
+                    ))
+                  ) : (
+                    <TableRow>
+                      <TableCell colSpan={5}>
+                        <EmptyState
+                          icon={Database}
+                          title="No volumes found"
+                          description="Create a volume to persist data for your containers."
+                          action={{ label: 'New Volume', onClick: () => {} }}
+                        />
+                      </TableCell>
+                    </TableRow>
+                  )}
                 </TableBody>
               </Table>
             </div>
@@ -133,6 +152,17 @@ function VolumeRow({ volume }: { volume: DockerVolume }) {
           </DropdownMenuContent>
         </DropdownMenu>
       </TableCell>
+    </TableRow>
+  );
+}
+function VolumeRowSkeleton() {
+  return (
+    <TableRow>
+      <TableCell><Skeleton className="h-5 w-40" /></TableCell>
+      <TableCell><Skeleton className="h-5 w-20" /></TableCell>
+      <TableCell><Skeleton className="h-5 w-16" /></TableCell>
+      <TableCell><Skeleton className="h-6 w-24" /></TableCell>
+      <TableCell className="text-right"><Skeleton className="h-8 w-8 inline-block" /></TableCell>
     </TableRow>
   );
 }

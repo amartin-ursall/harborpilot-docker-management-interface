@@ -86,6 +86,7 @@ export interface Alert {
   title: string;
   message: string;
   containerId?: string;
+  action?: 'view_dangling_images';
 }
 export interface HostDetails {
   hostname: string;
@@ -100,4 +101,9 @@ export interface ActivityEvent {
   type: 'container' | 'image' | 'volume' | 'network';
   action: 'created' | 'started' | 'stopped' | 'deleted' | 'pulled' | 'pruned';
   message: string;
+}
+export interface Host {
+  id: string;
+  name: string;
+  environment: 'local' | 'prod' | 'staging';
 }

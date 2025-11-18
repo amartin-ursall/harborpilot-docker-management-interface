@@ -1,9 +1,8 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
@@ -44,7 +43,6 @@ import {
 import { ChartContainer, ChartTooltipContent } from '@/components/ui/chart';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { cn } from '@/lib/utils';
-import { Badge } from '@/components/ui/badge';
 const summaryCards = [
   {
     title: 'Containers',
@@ -88,19 +86,22 @@ export function DashboardPage() {
   const alerts = useStore((s) => s.alerts);
   const hostDetails = useStore((s) => s.hostDetails);
   const recentActivity = useStore((s) => s.recentActivity);
-  const showDialog = useStore((s) => s.showDialog);
   const pruneSystem = useStore((s) => s.pruneSystem);
+  const selectContainerAndOpenDetails = useStore((s) => s.selectContainerAndOpenDetails);
+  const setImageDisplayFilter = useStore((s) => s.setImageDisplayFilter);
+  const navigate = useNavigate();
   const [timeRange, setTimeRange] = useState('1h');
   const chartConfig = {
     cpu: { label: 'CPU Usage (%)', color: 'hsl(var(--primary))' },
     memory: { label: 'Memory Usage (%)', color: 'hsl(var(--chart-2))' },
   };
-  const handlePruneSystem = () => {
-    showDialog({
-      title: 'Prune System?',
-      description: 'This will remove all stopped containers, dangling images, and unused networks and volumes. This action is irreversible.',
-      onConfirm: pruneSystem,
-    });
+  const handleAlertClick = (alert) => {
+    if (alert.containerId) {
+      selectContainerAndOpenDetails(alert.containerId, 'logs');
+    } else if (alert.action === 'view_dangling_images') {
+      setImageDisplayFilter('dangling');
+      navigate('/images');
+    }
   };
   return (
     <div className="max-w-full mx-auto animate-fade-in">
@@ -127,8 +128,8 @@ export function DashboardPage() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2"><Server className="h-5 w-5" /> Host Resources</CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              <CardContent className="pt-0">
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                   <ResourceStat icon={Cpu} title="CPU Usage" value={`${hostStats.cpuUsage}%`} />
                   <ResourceStat icon={MemoryStick} title="Memory" value={`${hostStats.memoryUsage} / ${hostStats.memoryTotal} GB`} />
                   <ResourceStat icon={HardDrive} title="Disk Usage" value={`${hostStats.diskUsage} / ${hostStats.diskTotal} GB`} />
@@ -184,7 +185,7 @@ export function DashboardPage() {
               <CardContent className="grid grid-cols-2 gap-4">
                 <Button variant="outline"><PlusCircle className="mr-2 h-4 w-4" /> New Container</Button>
                 <Button variant="outline"><Download className="mr-2 h-4 w-4" /> Pull Image</Button>
-                <Button variant="outline" onClick={handlePruneSystem}><Power className="mr-2 h-4 w-4" /> Prune System</Button>
+                <Button variant="destructive" onClick={pruneSystem}><Power className="mr-2 h-4 w-4" /> Prune System</Button>
                 <Button variant="outline"><FileText className="mr-2 h-4 w-4" /> Global Logs</Button>
               </CardContent>
             </Card>
@@ -192,10 +193,12 @@ export function DashboardPage() {
               <CardHeader><CardTitle className="flex items-center gap-2"><AlertTriangle className="text-destructive" /> Problems / Alerts</CardTitle></CardHeader>
               <CardContent className="space-y-4">
                 {alerts.map(alert => (
-                  <div key={alert.id} className={cn('p-3 rounded-lg border', alert.severity === 'critical' ? 'border-red-500/50 bg-red-500/10' : 'border-yellow-500/50 bg-yellow-500/10')}>
-                    <p className={cn('font-semibold', alert.severity === 'critical' ? 'text-red-500' : 'text-yellow-600')}>{alert.title}</p>
-                    <p className="text-sm text-muted-foreground">{alert.message}</p>
-                  </div>
+                  <button key={alert.id} onClick={() => handleAlertClick(alert)} className="w-full text-left p-3 rounded-lg border transition-colors hover:bg-accent/50" disabled={!alert.containerId && !alert.action}>
+                    <div className={cn(alert.severity === 'critical' ? 'border-red-500/50 bg-red-500/10' : 'border-yellow-500/50 bg-yellow-500/10', 'p-3 rounded-lg')}>
+                      <p className={cn('font-semibold', alert.severity === 'critical' ? 'text-red-500' : 'text-yellow-600')}>{alert.title}</p>
+                      <p className="text-sm text-muted-foreground">{alert.message}</p>
+                    </div>
+                  </button>
                 ))}
               </CardContent>
             </Card>

@@ -1,4 +1,4 @@
-import { Container, HostStats, ResourceUsage, ContainerDetails, LogEntry, ContainerEvent, DockerImage, DockerVolume, DockerNetwork, Alert, HostDetails, ActivityEvent } from './types';
+import { Container, HostStats, ResourceUsage, ContainerDetails, LogEntry, ContainerEvent, DockerImage, DockerVolume, DockerNetwork, Alert, HostDetails, ActivityEvent, Host } from './types';
 export const mockContainers: Container[] = [
   {
     id: 'a1b2c3d4e5f6',
@@ -171,7 +171,7 @@ export const mockNetworks: DockerNetwork[] = [
 export const mockAlerts: Alert[] = [
   { id: '1', severity: 'critical', title: 'Container Restarting', message: 'Container "api-gateway" is in a restart loop.', containerId: 'e5f6a1b2c3d4' },
   { id: '2', severity: 'warning', title: 'High CPU Usage', message: 'Host CPU usage is at 85%.', },
-  { id: '3', severity: 'warning', title: 'Dangling Images', message: 'Found 3 dangling images that can be pruned.', },
+  { id: '3', severity: 'warning', title: 'Dangling Images', message: 'Found 1 dangling image that can be pruned.', action: 'view_dangling_images' },
 ];
 export const mockHostDetails: HostDetails = {
   hostname: 'docker-host-01',
@@ -185,4 +185,9 @@ export const mockRecentActivity: ActivityEvent[] = [
   { id: '2', timestamp: '2023-10-27T09:30:00Z', type: 'image', action: 'pulled', message: 'Image "nginx:1.25-alpine" pulled successfully' },
   { id: '3', timestamp: '2023-10-27T09:00:00Z', type: 'container', action: 'stopped', message: 'Container "worker-jobs" exited with code 0' },
   { id: '4', timestamp: '2023-10-26T18:00:00Z', type: 'volume', action: 'created', message: 'Volume "new_data_volume" created' },
+];
+export const mockHosts: Host[] = [
+    { id: 'docker-local', name: 'Docker Local', environment: 'local' },
+    { id: 'prod-cluster-1', name: 'prod-cluster-1', environment: 'prod' },
+    { id: 'staging-server', name: 'staging-server', environment: 'staging' },
 ];

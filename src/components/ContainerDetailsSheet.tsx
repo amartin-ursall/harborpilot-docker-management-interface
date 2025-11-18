@@ -13,7 +13,6 @@ import {
 } from '@/components/ui/tabs';
 import { useStore } from '@/hooks/useStore';
 import {
-  mockContainerDetails,
   mockContainerEvents,
   mockContainerInspect,
   mockContainerLogs,
@@ -29,6 +28,8 @@ export function ContainerDetailsSheet() {
   const isDetailsPanelOpen = useStore((s) => s.isDetailsPanelOpen);
   const setDetailsPanelOpen = useStore((s) => s.setDetailsPanelOpen);
   const selectedContainer = useStore((s) => s.selectedContainer);
+  const detailsSheetDefaultTab = useStore((s) => s.detailsSheetDefaultTab);
+  const setDetailsSheetDefaultTab = useStore((s) => s.setDetailsSheetDefaultTab);
   if (!selectedContainer) return null;
   return (
     <Sheet open={isDetailsPanelOpen} onOpenChange={setDetailsPanelOpen}>
@@ -40,7 +41,11 @@ export function ContainerDetailsSheet() {
           </SheetDescription>
         </SheetHeader>
         <div className="flex-1 overflow-hidden">
-          <Tabs defaultValue="overview" className="h-full flex flex-col">
+          <Tabs
+            value={detailsSheetDefaultTab}
+            onValueChange={setDetailsSheetDefaultTab}
+            className="h-full flex flex-col"
+          >
             <TabsList className="mx-6 mt-4">
               <TabsTrigger value="overview">Overview</TabsTrigger>
               <TabsTrigger value="logs">Logs</TabsTrigger>
