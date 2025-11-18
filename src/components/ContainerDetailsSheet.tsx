@@ -21,9 +21,10 @@ import {
 import { Badge } from './ui/badge';
 import { ScrollArea } from './ui/scroll-area';
 import { Button } from './ui/button';
-import { Play, Power, RefreshCw, StopCircle, Trash2 } from 'lucide-react';
+import { Play, RefreshCw, StopCircle, Trash2 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
-import { LogEntry } from '@/lib/types';
+import { ContainerStatus, LogEntry } from '@/lib/types';
+import { toast } from 'sonner';
 export function ContainerDetailsSheet() {
   const isDetailsPanelOpen = useStore((s) => s.isDetailsPanelOpen);
   const setDetailsPanelOpen = useStore((s) => s.setDetailsPanelOpen);
@@ -71,14 +72,34 @@ export function ContainerDetailsSheet() {
   );
 }
 function OverviewTab() {
-  const container = mockContainerDetails;
+  const container = useStore((s) => s.selectedContainer);
+  const toggleContainerStatus = useStore((s) => s.toggleContainerStatus);
+  const deleteContainer = useStore((s) => s.deleteContainer);
+  const showDialog = useStore((s) => s.showDialog);
+  const setDetailsPanelOpen = useStore((s) => s.setDetailsPanelOpen);
+  if (!container) return null;
+  const handleStatusToggle = (status: ContainerStatus) => {
+    toggleContainerStatus(container.id, status);
+    toast.success(`Container "${container.name}" is now ${status}.`);
+  };
+  const handleDelete = () => {
+    showDialog({
+      title: `Delete Container: ${container.name}?`,
+      description: `This action is irreversible. The container and its associated data may be lost. Are you sure you want to proceed?`,
+      onConfirm: () => {
+        deleteContainer(container.id);
+        setDetailsPanelOpen(false);
+        toast.success(`Container "${container.name}" deleted successfully.`);
+      },
+    });
+  };
   return (
     <>
       <div className="flex items-center gap-4">
-        <Button variant="outline" size="sm"><Play className="mr-2 h-4 w-4" /> Start</Button>
-        <Button variant="outline" size="sm"><StopCircle className="mr-2 h-4 w-4" /> Stop</Button>
-        <Button variant="outline" size="sm"><RefreshCw className="mr-2 h-4 w-4" /> Restart</Button>
-        <Button variant="destructive" size="sm"><Trash2 className="mr-2 h-4 w-4" /> Delete</Button>
+        <Button variant="outline" size="sm" onClick={() => handleStatusToggle('running')}><Play className="mr-2 h-4 w-4" /> Start</Button>
+        <Button variant="outline" size="sm" onClick={() => handleStatusToggle('exited')}><StopCircle className="mr-2 h-4 w-4" /> Stop</Button>
+        <Button variant="outline" size="sm" onClick={() => handleStatusToggle('restarting')}><RefreshCw className="mr-2 h-4 w-4" /> Restart</Button>
+        <Button variant="destructive" size="sm" onClick={handleDelete}><Trash2 className="mr-2 h-4 w-4" /> Delete</Button>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <InfoCard title="Status" value={container.status} />

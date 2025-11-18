@@ -42,7 +42,7 @@ export function NetworksPage() {
   const filteredNetworks = useMemo(() => {
     const filter = networkFilter.toLowerCase();
     if (!filter) return networks;
-    return networks.filter(n => 
+    return networks.filter(n =>
       n.name.toLowerCase().includes(filter) ||
       n.id.toLowerCase().includes(filter)
     );
@@ -57,8 +57,8 @@ export function NetworksPage() {
               <div className="flex items-center gap-2 w-full sm:w-auto">
                 <div className="relative w-full sm:w-64">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input 
-                    placeholder="Search networks..." 
+                  <Input
+                    placeholder="Search networks..."
                     className="pl-9"
                     value={networkFilter}
                     onChange={(e) => setNetworkFilter(e.target.value)}
@@ -95,12 +95,13 @@ export function NetworksPage() {
 }
 function NetworkRow({ network }: { network: DockerNetwork }) {
   const showDialog = useStore((s) => s.showDialog);
+  const deleteNetwork = useStore((s) => s.deleteNetwork);
   const handleDelete = () => {
     showDialog({
       title: `Delete Network: ${network.name}?`,
       description: 'This action is irreversible. Any containers connected to this network will be disconnected. Are you sure you want to proceed?',
       onConfirm: () => {
-        console.log(`Deleting network ${network.id}`);
+        deleteNetwork(network.id);
         toast.success(`Network "${network.name}" deleted successfully.`);
       },
     });

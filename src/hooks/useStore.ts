@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { mockContainers, mockHostStats, mockResourceUsage, mockSummary, mockContainerDetails, mockImages, mockVolumes, mockNetworks, mockAlerts, mockHostDetails, mockRecentActivity } from '@/lib/mockData';
-import { Container, HostStats, ResourceUsage, ContainerDetails, DockerImage, DockerVolume, DockerNetwork, ContainerSummary, Alert, HostDetails as HostDetailsType, ActivityEvent } from '@/lib/types';
+import { Container, HostStats, ResourceUsage, ContainerDetails, DockerImage, DockerVolume, DockerNetwork, ContainerSummary, Alert, HostDetails as HostDetailsType, ActivityEvent, ContainerStatus } from '@/lib/types';
 import { toast } from 'sonner';
 type DialogState = {
   isOpen: boolean;
@@ -43,6 +43,13 @@ type AppState = {
   setNetworkFilter: (filter: string) => void;
   showDialog: (options: Omit<DialogState, 'isOpen'>) => void;
   hideDialog: () => void;
+  toggleContainerStatus: (id: string, status: ContainerStatus) => void;
+  deleteContainer: (id: string) => void;
+  deleteImage: (id: string) => void;
+  pruneImages: () => void;
+  deleteVolume: (name: string) => void;
+  deleteNetwork: (id: string) => void;
+  pruneSystem: () => void;
 };
 export const useStore = create<AppState>((set, get) => ({
   containers: [],
@@ -97,6 +104,28 @@ export const useStore = create<AppState>((set, get) => ({
   hideDialog: () => set(state => ({
     dialog: { ...state.dialog, isOpen: false }
   })),
+  toggleContainerStatus: (id, status) => set(state => ({
+    containers: state.containers.map(c => c.id === id ? { ...c, status } : c)
+  })),
+  deleteContainer: (id) => set(state => ({
+    containers: state.containers.filter(c => c.id !== id)
+  })),
+  deleteImage: (id) => set(state => ({
+    images: state.images.filter(i => i.id !== id)
+  })),
+  pruneImages: () => set(state => ({
+    images: state.images.filter(i => i.name !== '<none>')
+  })),
+  deleteVolume: (name) => set(state => ({
+    volumes: state.volumes.filter(v => v.name !== name)
+  })),
+  deleteNetwork: (id) => set(state => ({
+    networks: state.networks.filter(n => n.id !== id)
+  })),
+  pruneSystem: () => {
+    get().pruneImages();
+    toast.success('System pruned successfully.');
+  },
 }));
 // Initialize store with data
 useStore.getState().fetchContainers();

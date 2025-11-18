@@ -55,8 +55,8 @@ export function VolumesPage() {
               <div className="flex items-center gap-2 w-full sm:w-auto">
                 <div className="relative w-full sm:w-64">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input 
-                    placeholder="Search volumes..." 
+                  <Input
+                    placeholder="Search volumes..."
                     className="pl-9"
                     value={volumeFilter}
                     onChange={(e) => setVolumeFilter(e.target.value)}
@@ -93,12 +93,13 @@ export function VolumesPage() {
 }
 function VolumeRow({ volume }: { volume: DockerVolume }) {
   const showDialog = useStore((s) => s.showDialog);
+  const deleteVolume = useStore((s) => s.deleteVolume);
   const handleDelete = () => {
     showDialog({
       title: `Delete Volume: ${volume.name}?`,
       description: `This action is irreversible and will permanently delete all data stored in this volume. Are you sure you want to proceed?`,
       onConfirm: () => {
-        console.log(`Deleting volume ${volume.name}`);
+        deleteVolume(volume.name);
         toast.success(`Volume "${volume.name}" deleted successfully.`);
       },
     });

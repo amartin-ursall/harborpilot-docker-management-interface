@@ -88,10 +88,19 @@ export function DashboardPage() {
   const alerts = useStore((s) => s.alerts);
   const hostDetails = useStore((s) => s.hostDetails);
   const recentActivity = useStore((s) => s.recentActivity);
+  const showDialog = useStore((s) => s.showDialog);
+  const pruneSystem = useStore((s) => s.pruneSystem);
   const [timeRange, setTimeRange] = useState('1h');
   const chartConfig = {
     cpu: { label: 'CPU Usage (%)', color: 'hsl(var(--primary))' },
     memory: { label: 'Memory Usage (%)', color: 'hsl(var(--chart-2))' },
+  };
+  const handlePruneSystem = () => {
+    showDialog({
+      title: 'Prune System?',
+      description: 'This will remove all stopped containers, dangling images, and unused networks and volumes. This action is irreversible.',
+      onConfirm: pruneSystem,
+    });
   };
   return (
     <div className="max-w-full mx-auto animate-fade-in">
@@ -175,7 +184,7 @@ export function DashboardPage() {
               <CardContent className="grid grid-cols-2 gap-4">
                 <Button variant="outline"><PlusCircle className="mr-2 h-4 w-4" /> New Container</Button>
                 <Button variant="outline"><Download className="mr-2 h-4 w-4" /> Pull Image</Button>
-                <Button variant="outline"><Power className="mr-2 h-4 w-4" /> Prune System</Button>
+                <Button variant="outline" onClick={handlePruneSystem}><Power className="mr-2 h-4 w-4" /> Prune System</Button>
                 <Button variant="outline"><FileText className="mr-2 h-4 w-4" /> Global Logs</Button>
               </CardContent>
             </Card>

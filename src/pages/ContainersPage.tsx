@@ -59,8 +59,8 @@ export function ContainersPage() {
   const filteredContainers = useMemo(() => {
     const filter = containerFilter.toLowerCase();
     if (!filter) return containers;
-    return containers.filter(c => 
-      c.name.toLowerCase().includes(filter) || 
+    return containers.filter(c =>
+      c.name.toLowerCase().includes(filter) ||
       c.image.toLowerCase().includes(filter) ||
       c.id.toLowerCase().includes(filter)
     );
@@ -75,9 +75,9 @@ export function ContainersPage() {
               <div className="flex items-center gap-2 w-full sm:w-auto">
                 <div className="relative w-full sm:w-64">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input 
-                    placeholder="Search containers..." 
-                    className="pl-9" 
+                  <Input
+                    placeholder="Search containers..."
+                    className="pl-9"
                     value={containerFilter}
                     onChange={(e) => setContainerFilter(e.target.value)}
                   />
@@ -117,6 +117,8 @@ function ContainerRow({ container }: { container: Container }) {
   const selectContainer = useStore((s) => s.selectContainer);
   const setDetailsPanelOpen = useStore((s) => s.setDetailsPanelOpen);
   const showDialog = useStore((s) => s.showDialog);
+  const deleteContainer = useStore((s) => s.deleteContainer);
+  const toggleContainerStatus = useStore((s) => s.toggleContainerStatus);
   const handleOpenDetails = () => {
     selectContainer(container.id);
     setDetailsPanelOpen(true);
@@ -126,10 +128,14 @@ function ContainerRow({ container }: { container: Container }) {
       title: `Delete Container: ${container.name}?`,
       description: `This action is irreversible. The container and its associated data may be lost. Are you sure you want to proceed?`,
       onConfirm: () => {
-        console.log(`Deleting container ${container.id}`);
+        deleteContainer(container.id);
         toast.success(`Container "${container.name}" deleted successfully.`);
       },
     });
+  };
+  const handleStatusToggle = (status: ContainerStatus) => {
+    toggleContainerStatus(container.id, status);
+    toast.success(`Container "${container.name}" is now ${status}.`);
   };
   return (
     <TableRow className="hover:bg-accent transition-colors">
@@ -157,9 +163,9 @@ function ContainerRow({ container }: { container: Container }) {
       <TableCell className="text-right">
         <div className="flex items-center justify-end gap-2">
           <TooltipProvider>
-            <ActionIcon action="start" icon={Play} />
-            <ActionIcon action="stop" icon={StopCircle} />
-            <ActionIcon action="restart" icon={RefreshCw} />
+            <ActionIcon action="start" icon={Play} onClick={() => handleStatusToggle('running')} />
+            <ActionIcon action="stop" icon={StopCircle} onClick={() => handleStatusToggle('exited')} />
+            <ActionIcon action="restart" icon={RefreshCw} onClick={() => handleStatusToggle('restarting')} />
           </TooltipProvider>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -171,7 +177,7 @@ function ContainerRow({ container }: { container: Container }) {
               <DropdownMenuItem onClick={handleOpenDetails}><FileText className="mr-2 h-4 w-4" /> Logs</DropdownMenuItem>
               <DropdownMenuItem onClick={handleOpenDetails}><Terminal className="mr-2 h-4 w-4" /> Console</DropdownMenuItem>
               <DropdownMenuItem onClick={handleOpenDetails}><Info className="mr-2 h-4 w-4" /> Details</DropdownMenuItem>
-              <DropdownMenuItem><Pause className="mr-2 h-4 w-4" /> Pause</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleStatusToggle('paused')}><Pause className="mr-2 h-4 w-4" /> Pause</DropdownMenuItem>
               <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={handleDelete}>
                 <Trash2 className="mr-2 h-4 w-4" /> Delete
               </DropdownMenuItem>
@@ -182,11 +188,11 @@ function ContainerRow({ container }: { container: Container }) {
     </TableRow>
   );
 }
-function ActionIcon({ action, icon: Icon }: { action: string; icon: React.ElementType }) {
+function ActionIcon({ action, icon: Icon, onClick }: { action: string; icon: React.ElementType; onClick: () => void; }) {
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <Button variant="ghost" size="icon" className="h-8 w-8">
+        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={onClick}>
           <Icon className="h-4 w-4" />
         </Button>
       </TooltipTrigger>

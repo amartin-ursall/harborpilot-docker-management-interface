@@ -22,6 +22,7 @@ import {
 } from '@/components/ui/select';
 import { ThemeToggle } from './ThemeToggle';
 import { MobileSidebar } from './MobileSidebar';
+import { useStore } from '@/hooks/useStore';
 const getTitleFromPath = (path: string) => {
   if (path === '/') return 'Dashboard';
   const title = path.replace('/', '').replace(/-/g, ' ');
@@ -30,6 +31,15 @@ const getTitleFromPath = (path: string) => {
 export function HarborPilotHeader() {
   const location = useLocation();
   const title = getTitleFromPath(location.pathname);
+  const showDialog = useStore((s) => s.showDialog);
+  const pruneSystem = useStore((s) => s.pruneSystem);
+  const handlePruneSystem = () => {
+    showDialog({
+      title: 'Prune System?',
+      description: 'This will remove all stopped containers, dangling images, and unused networks and volumes. This action is irreversible.',
+      onConfirm: pruneSystem,
+    });
+  };
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/80 backdrop-blur-sm px-4 md:px-6">
       <MobileSidebar />
@@ -65,7 +75,10 @@ export function HarborPilotHeader() {
               <RefreshCw className="mr-2 h-4 w-4" />
               Pull Image
             </DropdownMenuItem>
-            <DropdownMenuItem className="text-destructive focus:bg-destructive/10 focus:text-destructive">
+            <DropdownMenuItem
+              className="text-destructive focus:bg-destructive/10 focus:text-destructive"
+              onClick={handlePruneSystem}
+            >
               <Power className="mr-2 h-4 w-4" />
               Prune System
             </DropdownMenuItem>

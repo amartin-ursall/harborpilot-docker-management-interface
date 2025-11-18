@@ -39,6 +39,7 @@ export function ImagesPage() {
   const imageFilter = useStore((s) => s.imageFilter);
   const setImageFilter = useStore((s) => s.setImageFilter);
   const showDialog = useStore((s) => s.showDialog);
+  const pruneImages = useStore((s) => s.pruneImages);
   const fetchImages = useStore.getState().fetchImages;
   useEffect(() => {
     fetchImages();
@@ -46,7 +47,7 @@ export function ImagesPage() {
   const filteredImages = useMemo(() => {
     const filter = imageFilter.toLowerCase();
     if (!filter) return images;
-    return images.filter(i => 
+    return images.filter(i =>
       i.name.toLowerCase().includes(filter) ||
       i.tag.toLowerCase().includes(filter) ||
       i.id.toLowerCase().includes(filter)
@@ -57,7 +58,7 @@ export function ImagesPage() {
       title: 'Prune Unused Images?',
       description: 'This will remove all dangling images (images not tagged or associated with a container). This action cannot be undone.',
       onConfirm: () => {
-        console.log('Pruning images');
+        pruneImages();
         toast.success('Unused images pruned successfully.');
       },
     });
@@ -72,8 +73,8 @@ export function ImagesPage() {
               <div className="flex items-center gap-2 w-full sm:w-auto">
                 <div className="relative w-full sm:w-64">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input 
-                    placeholder="Search images..." 
+                  <Input
+                    placeholder="Search images..."
                     className="pl-9"
                     value={imageFilter}
                     onChange={(e) => setImageFilter(e.target.value)}
@@ -113,12 +114,13 @@ export function ImagesPage() {
 function ImageRow({ image }: { image: DockerImage }) {
   const isDangling = image.name === '<none>';
   const showDialog = useStore((s) => s.showDialog);
+  const deleteImage = useStore((s) => s.deleteImage);
   const handleDelete = () => {
     showDialog({
       title: `Delete Image: ${image.name}:${image.tag}?`,
       description: 'This action is irreversible. If any containers are using this image, they may fail. Are you sure you want to proceed?',
       onConfirm: () => {
-        console.log(`Deleting image ${image.id}`);
+        deleteImage(image.id);
         toast.success(`Image "${image.name}:${image.tag}" deleted successfully.`);
       },
     });
