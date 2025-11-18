@@ -8,7 +8,7 @@ import {
   SheetHeader,
   SheetTrigger,
 } from '@/components/ui/sheet';
-import { navItems } from './HarborPilotSidebar';
+import { navItems } from '@/lib/nav-items';
 import { cn } from '@/lib/utils';
 export function MobileSidebar() {
   const [isOpen, setIsOpen] = useState(false);
