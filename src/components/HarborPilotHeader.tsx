@@ -21,6 +21,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { ThemeToggle } from './ThemeToggle';
+import { MobileSidebar } from './MobileSidebar';
 const getTitleFromPath = (path: string) => {
   if (path === '/') return 'Dashboard';
   const title = path.replace('/', '').replace(/-/g, ' ');
@@ -31,7 +32,8 @@ export function HarborPilotHeader() {
   const title = getTitleFromPath(location.pathname);
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/80 backdrop-blur-sm px-4 md:px-6">
-      <h1 className="text-2xl font-semibold text-foreground">{title}</h1>
+      <MobileSidebar />
+      <h1 className="hidden md:block text-2xl font-semibold text-foreground">{title}</h1>
       <div className="ml-auto flex items-center gap-4">
         <Select defaultValue="docker-local">
           <SelectTrigger className="w-[200px] hidden sm:flex">

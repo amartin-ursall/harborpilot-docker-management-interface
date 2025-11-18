@@ -16,7 +16,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-const navItems = [
+export const navItems = [
   { to: '/', icon: LayoutDashboard, label: 'Dashboard' },
   { to: '/containers', icon: Container, label: 'Containers' },
   { to: '/images', icon: Image, label: 'Images' },
