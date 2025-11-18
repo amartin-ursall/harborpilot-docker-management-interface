@@ -20,6 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { ThemeToggle } from './ThemeToggle';
 const getTitleFromPath = (path: string) => {
   if (path === '/') return 'Dashboard';
   const title = path.replace('/', '').replace(/-/g, ' ');
@@ -68,6 +69,7 @@ export function HarborPilotHeader() {
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
+        <ThemeToggle />
       </div>
     </header>
   );

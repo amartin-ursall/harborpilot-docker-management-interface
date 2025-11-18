@@ -3,15 +3,8 @@ import { HarborPilotSidebar } from '@/components/HarborPilotSidebar';
 import { HarborPilotHeader } from '@/components/HarborPilotHeader';
 import { Toaster } from '@/components/ui/sonner';
 import { useTheme } from '@/hooks/use-theme';
-import { useEffect } from 'react';
 export function HomePage() {
   const { isDark } = useTheme();
-  useEffect(() => {
-    // Force dark theme for this application
-    if (!isDark) {
-      document.documentElement.classList.add('dark');
-    }
-  }, [isDark]);
   return (
     <div className="min-h-screen w-full bg-background text-foreground flex">
       <HarborPilotSidebar />
@@ -21,7 +14,7 @@ export function HomePage() {
           <Outlet />
         </div>
       </main>
-      <Toaster richColors theme="dark" />
+      <Toaster richColors theme={isDark ? 'dark' : 'light'} />
     </div>
   );
 }
