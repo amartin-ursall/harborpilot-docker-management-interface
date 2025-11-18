@@ -36,7 +36,7 @@ import { DockerImage } from '@/lib/types';
 import { useEffect } from 'react';
 export function ImagesPage() {
   const images = useStore((s) => s.images);
-  const fetchImages = useStore((s) => s.fetchImages);
+  const fetchImages = useStore.getState().fetchImages;
   useEffect(() => {
     fetchImages();
   }, [fetchImages]);

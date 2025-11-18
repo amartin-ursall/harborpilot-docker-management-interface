@@ -33,7 +33,7 @@ import { useEffect } from 'react';
 import { Badge } from '@/components/ui/badge';
 export function VolumesPage() {
   const volumes = useStore((s) => s.volumes);
-  const fetchVolumes = useStore((s) => s.fetchVolumes);
+  const fetchVolumes = useStore.getState().fetchVolumes;
   useEffect(() => {
     fetchVolumes();
   }, [fetchVolumes]);

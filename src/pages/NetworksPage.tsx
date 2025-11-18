@@ -32,7 +32,7 @@ import { DockerNetwork } from '@/lib/types';
 import { useEffect } from 'react';
 export function NetworksPage() {
   const networks = useStore((s) => s.networks);
-  const fetchNetworks = useStore((s) => s.fetchNetworks);
+  const fetchNetworks = useStore.getState().fetchNetworks;
   useEffect(() => {
     fetchNetworks();
   }, [fetchNetworks]);
