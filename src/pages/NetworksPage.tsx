@@ -31,7 +31,6 @@ import {
 import { useStore } from '@/hooks/useStore';
 import { DockerNetwork } from '@/lib/types';
 import { useEffect, useMemo } from 'react';
-import { toast } from 'sonner';
 import { Skeleton } from '@/components/ui/skeleton';
 import { EmptyState } from '@/components/EmptyState';
 export function NetworksPage() {
@@ -120,10 +119,7 @@ function NetworkRow({ network }: { network: DockerNetwork }) {
     showDialog({
       title: `Delete Network: ${network.name}?`,
       description: 'This action is irreversible. Any containers connected to this network will be disconnected. Are you sure you want to proceed?',
-      onConfirm: () => {
-        deleteNetwork(network.id);
-        toast.success(`Network "${network.name}" deleted successfully.`);
-      },
+      onConfirm: () => deleteNetwork(network.id),
     });
   };
   return (

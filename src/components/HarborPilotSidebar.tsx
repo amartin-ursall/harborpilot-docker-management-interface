@@ -44,7 +44,7 @@ export function HarborPilotSidebar() {
         </TooltipProvider>
       </nav>
       <div className="px-6 py-4 border-t text-xs text-muted-foreground">
-        <p>Built with ❤️ at Cloudflare</p>
+        <p>Built with care</p>
       </div>
     </aside>
   );

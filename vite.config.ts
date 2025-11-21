@@ -3,13 +3,11 @@ import path from "path";
 import react from "@vitejs/plugin-react";
 import { exec } from "node:child_process";
 import pino from "pino";
-import { cloudflare } from "@cloudflare/vite-plugin";
 
 const logger = pino();
 
 const stripAnsi = (str: string) =>
   str.replace(
-    // eslint-disable-next-line no-control-regex -- Allow ANSI escape stripping
     /[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g,
     ""
   );
@@ -33,24 +31,18 @@ const emitLog = (level: "info" | "warn" | "error", rawMessage: string) => {
   }
 };
 
-// 3. Create the custom logger for Vite
 const customLogger = {
   warnOnce: (msg: string) => emitLog("warn", msg),
-
-  // Use Pino's methods, passing the cleaned message
   info: (msg: string) => emitLog("info", msg),
   warn: (msg: string) => emitLog("warn", msg),
   error: (msg: string) => emitLog("error", msg),
   hasErrorLogged: () => false,
-
-  // Keep these as-is
   clearScreen: () => {},
   hasWarned: false,
 };
 
 function watchDependenciesPlugin() {
   return {
-    // Plugin to clear caches when dependencies change
     name: "watch-dependencies",
     configureServer(server: any) {
       const filesToWatch = [
@@ -61,51 +53,51 @@ function watchDependenciesPlugin() {
       server.watcher.add(filesToWatch);
 
       server.watcher.on("change", (filePath: string) => {
-        if (filesToWatch.includes(filePath)) {
-          console.log(
-            `\n📦 Dependency file changed: ${path.basename(
-              filePath
-            )}. Clearing caches...`
-          );
+        if (!filesToWatch.includes(filePath)) return;
 
-          // Run the cache-clearing command
-          exec(
-            "rm -f .eslintcache tsconfig.tsbuildinfo",
-            (err, stdout, stderr) => {
-              if (err) {
-                console.error("Failed to clear caches:", stderr);
-                return;
-              }
-              console.log("✅ Caches cleared successfully.\n");
-            }
-          );
-        }
+        console.log(
+          `\n[watch] Dependency file changed: ${path.basename(
+            filePath
+          )}. Clearing caches...\n`
+        );
+
+        exec("rm -f .eslintcache tsconfig.tsbuildinfo", (err, _stdout, stderr) => {
+          if (err) {
+            console.error("Failed to clear caches:", stderr);
+            return;
+          }
+          console.log("[watch] Caches cleared successfully.\n");
+        });
       });
     },
   };
 }
 
-// https://vite.dev/config/
 export default ({ mode }: { mode: string }) => {
   const env = loadEnv(mode, process.cwd());
   return defineConfig({
-    plugins: [react(), cloudflare(), watchDependenciesPlugin()],
+    plugins: [react(), watchDependenciesPlugin()],
     build: {
       minify: true,
-      sourcemap: "inline", // Use inline source maps for better error reporting
+      sourcemap: "inline",
       rollupOptions: {
         output: {
-          sourcemapExcludeSources: false, // Include original source in source maps
+          sourcemapExcludeSources: false,
         },
       },
     },
-    customLogger: env.VITE_LOGGER_TYPE === 'json' ? customLogger : undefined,
-    // Enable source maps in development too
+    customLogger: env.VITE_LOGGER_TYPE === "json" ? customLogger : undefined,
     css: {
       devSourcemap: true,
     },
     server: {
       allowedHosts: true,
+      proxy: {
+        "/api": {
+          target: env.VITE_API_PROXY_TARGET || "http://localhost:4000",
+          changeOrigin: true,
+        },
+      },
     },
     resolve: {
       alias: {
@@ -114,17 +106,13 @@ export default ({ mode }: { mode: string }) => {
       },
     },
     optimizeDeps: {
-      // This is still crucial for reducing the time from when `bun run dev`
-      // is executed to when the server is actually ready.
       include: ["react", "react-dom", "react-router-dom"],
-      exclude: ["agents"], // Exclude agents package from pre-bundling due to Node.js dependencies
+      exclude: ["agents"],
       force: true,
     },
     define: {
-      // Define Node.js globals for the agents package
       global: "globalThis",
     },
-    // Clear cache more aggressively
     cacheDir: "node_modules/.vite",
   });
 };

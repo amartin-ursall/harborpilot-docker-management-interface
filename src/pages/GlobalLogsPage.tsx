@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import {
   Card,
   CardContent,
@@ -24,45 +24,67 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { useStore } from '@/hooks/useStore';
 import { Container, LogEntry } from '@/lib/types';
-import { Check, ChevronsUpDown, Search, X } from 'lucide-react';
+import { Check, ChevronsUpDown, Search } from 'lucide-react';
 import { cn } from '@/lib/utils';
-// Enhanced mock log generation for more variety
-const generateMockLog = (container: Container): LogEntry => {
-  const levels: LogEntry['level'][] = ['info', 'warn', 'error'];
-  const messages = [
-    'Processing request GET /api/users',
-    'Database connection successful',
-    'User authenticated successfully',
-    'Failed to connect to upstream service',
-    'High memory usage detected',
-    'Request timeout on POST /api/data',
-  ];
-  return {
-    timestamp: new Date().toISOString(),
-    message: `[${container.name}] ${messages[Math.floor(Math.random() * messages.length)]}`,
-    level: levels[Math.floor(Math.random() * levels.length)],
-  };
-};
+import { api } from '@/lib/api';
+type GlobalLogEntry = LogEntry & { containerId: string; containerName: string };
 export function GlobalLogsPage() {
   const allContainers = useStore((state) => state.containers);
   const [selectedContainers, setSelectedContainers] = useState<Container[]>([]);
-  const [logs, setLogs] = useState<LogEntry[]>([]);
+  const [logs, setLogs] = useState<GlobalLogEntry[]>([]);
   const [filter, setFilter] = useState('');
   const [isStreaming, setIsStreaming] = useState(true);
+  const seenKeys = useRef<Set<string>>(new Set());
+
+  useEffect(() => {
+    seenKeys.current.clear();
+    setLogs([]);
+  }, [selectedContainers]);
+
   useEffect(() => {
     if (!isStreaming || selectedContainers.length === 0) {
       return;
     }
-    const interval = setInterval(() => {
-      const randomContainer = selectedContainers[Math.floor(Math.random() * selectedContainers.length)];
-      const newLog = generateMockLog(randomContainer);
-      setLogs((prevLogs) => [...prevLogs, newLog].slice(-200)); // Keep last 200 logs
-    }, 1500);
-    return () => clearInterval(interval);
+    let cancelled = false;
+    const fetchLogs = async () => {
+      try {
+        const results = await Promise.all(
+          selectedContainers.map(async (container) => {
+            const entries = await api.getContainerLogs(container.id, 100);
+            return entries.map((entry) => ({
+              ...entry,
+              containerId: container.id,
+              containerName: container.name,
+            }));
+          }),
+        );
+        if (!cancelled) {
+          setLogs((prev) => {
+            const next = [...prev];
+            for (const entry of results.flat()) {
+              const key = `${entry.containerId}-${entry.timestamp}-${entry.message}`;
+              if (seenKeys.current.has(key)) continue;
+              seenKeys.current.add(key);
+              next.push(entry);
+            }
+            return next.slice(-500);
+          });
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    fetchLogs();
+    const interval = setInterval(fetchLogs, 5000);
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
   }, [isStreaming, selectedContainers]);
+
   const filteredLogs = useMemo(() => {
     return logs.filter((log) =>
-      log.message.toLowerCase().includes(filter.toLowerCase())
+      `${log.containerName} ${log.message}`.toLowerCase().includes(filter.toLowerCase())
     );
   }, [logs, filter]);
   return (
@@ -97,7 +119,7 @@ export function GlobalLogsPage() {
             <ScrollArea className="h-[60vh] bg-muted/50 rounded-lg p-4 border">
               <div className="font-mono text-xs space-y-2">
                 {filteredLogs.map((log, i) => (
-                  <div key={i} className="flex items-start gap-4">
+                  <div key={`${log.containerId}-${log.timestamp}-${i}`} className="flex items-start gap-4">
                     <span className="text-muted-foreground whitespace-nowrap">
                       {new Date(log.timestamp).toLocaleTimeString()}
                     </span>
@@ -107,7 +129,7 @@ export function GlobalLogsPage() {
                         'text-yellow-400': log.level === 'warn',
                       })}
                     >
-                      {log.message}
+                      [{log.containerName}] {log.message}
                     </span>
                   </div>
                 ))}

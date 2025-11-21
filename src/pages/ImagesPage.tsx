@@ -34,7 +34,6 @@ import {
 import { useStore } from '@/hooks/useStore';
 import { DockerImage } from '@/lib/types';
 import { useEffect, useMemo } from 'react';
-import { toast } from 'sonner';
 import { Skeleton } from '@/components/ui/skeleton';
 import { EmptyState } from '@/components/EmptyState';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
@@ -146,10 +145,7 @@ function ImageRow({ image }: { image: DockerImage }) {
     showDialog({
       title: `Delete Image: ${image.name}:${image.tag}?`,
       description: 'This action is irreversible. If any containers are using this image, they may fail. Are you sure you want to proceed?',
-      onConfirm: () => {
-        deleteImage(image.id);
-        toast.success(`Image "${image.name}:${image.tag}" deleted successfully.`);
-      },
+      onConfirm: () => deleteImage(image.id),
     });
   };
   return (

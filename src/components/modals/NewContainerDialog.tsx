@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -13,11 +13,18 @@ import { Label } from '@/components/ui/label';
 import { useStore } from '@/hooks/useStore';
 import { toast } from 'sonner';
 import { PlusCircle, Trash2 } from 'lucide-react';
+import { api } from '@/lib/api';
 export function NewContainerDialog() {
   const isOpen = useStore((s) => s.modals.isNewContainerOpen);
   const setModalOpen = useStore((s) => s.setModalOpen);
+  const fetchContainers = useStore((s) => s.fetchContainers);
+  const fetchOverview = useStore((s) => s.fetchOverview);
   const [step, setStep] = useState(1);
+  const [image, setImage] = useState('');
+  const [name, setName] = useState('');
+  const [command, setCommand] = useState('');
   const [ports, setPorts] = useState([{ host: '', container: '' }]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const handlePortChange = (index: number, field: 'host' | 'container', value: string) => {
     const newPorts = [...ports];
     newPorts[index][field] = value;
@@ -30,13 +37,50 @@ export function NewContainerDialog() {
     const newPorts = ports.filter((_, i) => i !== index);
     setPorts(newPorts);
   };
+  useEffect(() => {
+    if (!isOpen) {
+      setStep(1);
+      setImage('');
+      setName('');
+      setCommand('');
+      setPorts([{ host: '', container: '' }]);
+      setIsSubmitting(false);
+    }
+  }, [isOpen]);
+
   const handleClose = () => {
     setModalOpen('isNewContainerOpen', false);
-    setTimeout(() => setStep(1), 200); // Reset step on close
   };
-  const handleCreate = () => {
-    toast.success('Container created successfully (mock).');
-    handleClose();
+  const handleCreate = async () => {
+    if (!image.trim()) {
+      toast.error('Image is required');
+      return;
+    }
+    setIsSubmitting(true);
+    try {
+      const portMappings = ports
+        .filter((port) => port.container)
+        .map((port) => ({
+          hostPort: port.host,
+          containerPort: port.container,
+          protocol: 'tcp',
+        }));
+      await api.createContainer({
+        image: image.trim(),
+        name: name.trim() || undefined,
+        ports: portMappings,
+        command: command.trim() || undefined,
+        start: true,
+      });
+      await Promise.all([fetchContainers(), fetchOverview()]);
+      toast.success('Container created successfully.');
+      handleClose();
+    } catch (error) {
+      console.error(error);
+      toast.error(error instanceof Error ? error.message : 'Failed to create container');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
@@ -51,11 +95,33 @@ export function NewContainerDialog() {
           <div className="grid gap-4 py-4">
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="image" className="text-right">Image</Label>
-              <Input id="image" placeholder="e.g., nginx:latest" className="col-span-3" />
+              <Input
+                id="image"
+                placeholder="e.g., nginx:latest"
+                className="col-span-3"
+                value={image}
+                onChange={(e) => setImage(e.target.value)}
+              />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="name" className="text-right">Name</Label>
-              <Input id="name" placeholder="e.g., my-web-server" className="col-span-3" />
+              <Input
+                id="name"
+                placeholder="e.g., my-web-server"
+                className="col-span-3"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="command" className="text-right">Command</Label>
+              <Input
+                id="command"
+                placeholder="Optional command override"
+                className="col-span-3"
+                value={command}
+                onChange={(e) => setCommand(e.target.value)}
+              />
             </div>
           </div>
         )}
@@ -84,7 +150,11 @@ export function NewContainerDialog() {
         <DialogFooter>
           {step > 1 && <Button variant="outline" onClick={() => setStep(step - 1)}>Back</Button>}
           {step < 2 && <Button onClick={() => setStep(step + 1)}>Next</Button>}
-          {step === 2 && <Button onClick={handleCreate}>Create Container</Button>}
+          {step === 2 && (
+            <Button onClick={handleCreate} disabled={isSubmitting}>
+              {isSubmitting ? 'Creating…' : 'Create Container'}
+            </Button>
+          )}
         </DialogFooter>
       </DialogContent>
     </Dialog>

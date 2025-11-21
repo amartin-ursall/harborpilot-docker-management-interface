@@ -18,13 +18,40 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { useEffect, useState } from 'react';
+import { api } from '@/lib/api';
 export function NewVolumeDialog() {
   const isOpen = useStore((s) => s.modals.isNewVolumeOpen);
   const setModalOpen = useStore((s) => s.setModalOpen);
+  const fetchVolumes = useStore((s) => s.fetchVolumes);
+  const [name, setName] = useState('');
+  const [driver, setDriver] = useState('local');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  useEffect(() => {
+    if (!isOpen) {
+      setName('');
+      setDriver('local');
+      setIsSubmitting(false);
+    }
+  }, [isOpen]);
   const handleClose = () => setModalOpen('isNewVolumeOpen', false);
-  const handleCreate = () => {
-    toast.success('Volume created successfully (mock).');
-    handleClose();
+  const handleCreate = async () => {
+    if (!name.trim()) {
+      toast.error('Volume name is required');
+      return;
+    }
+    setIsSubmitting(true);
+    try {
+      await api.createVolume({ name: name.trim(), driver });
+      await fetchVolumes();
+      toast.success('Volume created successfully.');
+      handleClose();
+    } catch (error) {
+      console.error(error);
+      toast.error(error instanceof Error ? error.message : 'Failed to create volume');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
@@ -44,13 +71,15 @@ export function NewVolumeDialog() {
               id="volume-name"
               placeholder="e.g., my-data-volume"
               className="col-span-3"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
             />
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="driver" className="text-right">
               Driver
             </Label>
-            <Select defaultValue="local">
+            <Select value={driver} onValueChange={setDriver}>
               <SelectTrigger className="col-span-3">
                 <SelectValue placeholder="Select driver" />
               </SelectTrigger>
@@ -64,7 +93,9 @@ export function NewVolumeDialog() {
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={handleClose}>Cancel</Button>
-          <Button onClick={handleCreate}>Create</Button>
+          <Button onClick={handleCreate} disabled={isSubmitting}>
+            {isSubmitting ? 'Creating…' : 'Create'}
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

@@ -45,7 +45,6 @@ import {
 } from '@/components/ui/tooltip';
 import { ContainerDetailsSheet } from '@/components/ContainerDetailsSheet';
 import { useMemo } from 'react';
-import { toast } from 'sonner';
 import { Skeleton } from '@/components/ui/skeleton';
 import { EmptyState } from '@/components/EmptyState';
 const statusStyles: { [key in ContainerStatus]: string } = {
@@ -145,15 +144,11 @@ function ContainerRow({ container }: { container: Container }) {
     showDialog({
       title: `Delete Container: ${container.name}?`,
       description: `This action is irreversible. The container and its associated data may be lost. Are you sure you want to proceed?`,
-      onConfirm: () => {
-        deleteContainer(container.id);
-        toast.success(`Container "${container.name}" deleted successfully.`);
-      },
+      onConfirm: () => deleteContainer(container.id),
     });
   };
   const handleStatusToggle = (status: ContainerStatus) => {
     toggleContainerStatus(container.id, status);
-    toast.success(`Container "${container.name}" is now ${status}.`);
   };
   return (
     <TableRow className="hover:bg-accent transition-colors">

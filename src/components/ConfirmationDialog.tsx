@@ -13,9 +13,16 @@ import { AlertTriangle } from 'lucide-react';
 export function ConfirmationDialog() {
   const dialog = useStore((s) => s.dialog);
   const hideDialog = useStore((s) => s.hideDialog);
-  const handleConfirm = () => {
-    dialog.onConfirm();
-    hideDialog();
+  const setDialogProcessing = useStore((s) => s.setDialogProcessing);
+  const handleConfirm = async () => {
+    try {
+      setDialogProcessing(true);
+      await Promise.resolve(dialog.onConfirm());
+      hideDialog();
+    } catch (error) {
+      console.error(error);
+      setDialogProcessing(false);
+    }
   };
   return (
     <AlertDialog open={dialog.isOpen} onOpenChange={(open) => !open && hideDialog()}>
@@ -38,7 +45,11 @@ export function ConfirmationDialog() {
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction onClick={handleConfirm} className="bg-destructive hover:bg-destructive/90">
+          <AlertDialogAction
+            onClick={handleConfirm}
+            className="bg-destructive hover:bg-destructive/90"
+            disabled={dialog.isProcessing}
+          >
             Confirm
           </AlertDialogAction>
         </AlertDialogFooter>

@@ -32,7 +32,6 @@ import { useStore } from '@/hooks/useStore';
 import { DockerVolume } from '@/lib/types';
 import { useEffect, useMemo } from 'react';
 import { Badge } from '@/components/ui/badge';
-import { toast } from 'sonner';
 import { Skeleton } from '@/components/ui/skeleton';
 import { EmptyState } from '@/components/EmptyState';
 export function VolumesPage() {
@@ -118,10 +117,7 @@ function VolumeRow({ volume }: { volume: DockerVolume }) {
     showDialog({
       title: `Delete Volume: ${volume.name}?`,
       description: `This action is irreversible and will permanently delete all data stored in this volume. Are you sure you want to proceed?`,
-      onConfirm: () => {
-        deleteVolume(volume.name);
-        toast.success(`Volume "${volume.name}" deleted successfully.`);
-      },
+      onConfirm: () => deleteVolume(volume.name),
     });
   };
   return (

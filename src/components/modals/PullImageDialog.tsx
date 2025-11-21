@@ -11,16 +11,38 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useStore } from '@/hooks/useStore';
 import { toast } from 'sonner';
+import { useEffect, useState } from 'react';
+import { api } from '@/lib/api';
 export function PullImageDialog() {
   const isOpen = useStore((s) => s.modals.isPullImageOpen);
   const setModalOpen = useStore((s) => s.setModalOpen);
+  const fetchImages = useStore((s) => s.fetchImages);
+  const [reference, setReference] = useState('');
+  const [isPulling, setIsPulling] = useState(false);
+  useEffect(() => {
+    if (!isOpen) {
+      setReference('');
+      setIsPulling(false);
+    }
+  }, [isOpen]);
   const handleClose = () => setModalOpen('isPullImageOpen', false);
-  const handlePull = () => {
-    toast.info('Pulling image... (mock)');
-    setTimeout(() => {
-      toast.success('Image pulled successfully (mock).');
+  const handlePull = async () => {
+    if (!reference.trim()) {
+      toast.error('Image reference is required');
+      return;
+    }
+    setIsPulling(true);
+    try {
+      await api.pullImage(reference.trim());
+      await fetchImages();
+      toast.success('Image pulled successfully.');
       handleClose();
-    }, 1500);
+    } catch (error) {
+      console.error(error);
+      toast.error(error instanceof Error ? error.message : 'Failed to pull image');
+    } finally {
+      setIsPulling(false);
+    }
   };
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
@@ -40,12 +62,16 @@ export function PullImageDialog() {
               id="image-name"
               placeholder="e.g., ubuntu:22.04"
               className="col-span-3"
+              value={reference}
+              onChange={(e) => setReference(e.target.value)}
             />
           </div>
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={handleClose}>Cancel</Button>
-          <Button onClick={handlePull}>Pull</Button>
+          <Button onClick={handlePull} disabled={isPulling}>
+            {isPulling ? 'Pulling…' : 'Pull'}
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

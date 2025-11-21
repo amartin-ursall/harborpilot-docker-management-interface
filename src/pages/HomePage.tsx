@@ -8,8 +8,22 @@ import { NewContainerDialog } from '@/components/modals/NewContainerDialog';
 import { PullImageDialog } from '@/components/modals/PullImageDialog';
 import { NewVolumeDialog } from '@/components/modals/NewVolumeDialog';
 import { NewNetworkDialog } from '@/components/modals/NewNetworkDialog';
+import { useEffect } from 'react';
+import { useStore } from '@/hooks/useStore';
 export function HomePage() {
   const { isDark } = useTheme();
+  const fetchOverview = useStore((s) => s.fetchOverview);
+  const fetchContainers = useStore((s) => s.fetchContainers);
+  const fetchImages = useStore((s) => s.fetchImages);
+  const fetchVolumes = useStore((s) => s.fetchVolumes);
+  const fetchNetworks = useStore((s) => s.fetchNetworks);
+  useEffect(() => {
+    fetchOverview();
+    fetchContainers();
+    fetchImages();
+    fetchVolumes();
+    fetchNetworks();
+  }, [fetchOverview, fetchContainers, fetchImages, fetchVolumes, fetchNetworks]);
   return (
     <div className="min-h-screen w-full bg-background text-foreground flex">
       <HarborPilotSidebar />
